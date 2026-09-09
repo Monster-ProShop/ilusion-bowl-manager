@@ -7,10 +7,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-base: #0b0f19; --panel-bg: rgba(18, 28, 45, 0.75);
-            --neon-teal: #00e5ff; --neon-teal-dim: rgba(0, 229, 255, 0.2);
-            --neon-copper: #e28743; --neon-copper-dim: rgba(226, 135, 67, 0.2);
-            --text-main: #e2e8f0; --text-muted: #94a3b8; --danger: #ff4757;
+            --bg-base: #0b0f19;
+            --panel-bg: rgba(18, 28, 45, 0.75);
+            --neon-teal: #00e5ff;
+            --neon-teal-dim: rgba(0, 229, 255, 0.2);
+            --neon-copper: #e28743;
+            --neon-copper-dim: rgba(226, 135, 67, 0.2);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --danger: #ff4757;
         }
 
         body { 
@@ -56,8 +61,10 @@
         
         #btn-lang { border-color: #a855f7; color: #a855f7; }
         #btn-lang:hover { background: rgba(168, 85, 247, 0.2); box-shadow: 0 0 15px rgba(168, 85, 247, 0.3); }
+        
         #btn-login { border-color: var(--neon-copper); color: var(--neon-copper); }
         #btn-login:hover { background: var(--neon-copper-dim); box-shadow: 0 0 15px var(--neon-copper-dim); }
+        
         .danger-btn { border-color: var(--danger); color: var(--danger); }
         .danger-btn:hover { background: rgba(255, 71, 87, 0.2); box-shadow: 0 0 15px rgba(255, 71, 87, 0.3); }
 
@@ -90,8 +97,7 @@
 
 <header>
     <div class="header-brand">
-        <!-- Make sure image_7e9189.png is uploaded to the root of your GitHub repo too -->
-        <img src="image_7e9189.png" alt="Ilusion Bowl Logo" class="logo" onerror="this.style.display='none'">
+        <img src="image_7e9189.png" alt="Ilusion Bowl Logo" class="logo">
         <div>
             <h2>ILUSIONBOWL</h2>
             <span class="subtitle" data-i18n="subtitle">Synergy Experts</span>
@@ -142,9 +148,11 @@
     </div>
 
     <div class="form-group">
-        <label data-i18n="setup_divs">Number of Divisions</label>
-        <input type="number" id="num-divisions" placeholder="e.g. 2" min="1" onchange="renderDivisionInputs()">
-        <div id="division-names-container" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;"></div>
+        <label data-i18n="setup_divs">Division Stratification</label>
+        <div style="display: flex; gap: 15px;">
+            <input type="number" id="div-teams" placeholder="# of Team Divisions (e.g. 2)" style="width: 50%;">
+            <input type="number" id="div-bowlers" placeholder="# of Bowler Divisions (e.g. 4)" style="width: 50%;">
+        </div>
     </div>
 
     <div class="form-group">
@@ -155,12 +163,8 @@
         </div>
         <select id="lane-movement">
             <option value="none" data-i18n="lane_opt_none">Static Alignment - No Movement</option>
-            <option value="right1" data-i18n="lane_opt_r1">One pair to the right</option>
-            <option value="left1" data-i18n="lane_opt_l1">One pair to the left</option>
-            <option value="evenR_oddL_1" data-i18n="lane_opt_erol1">Evens to the right / Odds to the left (1 pair)</option>
-            <option value="evenR_oddL_2" data-i18n="lane_opt_erol2">Evens to the right / Odds to the left (2 pair)</option>
-            <option value="pos_right1" data-i18n="lane_opt_posR1">Positions round (Move 1 pair right)</option>
-            <option value="fan_spread" data-i18n="lane_opt_fan">Fan spread / Abanico (Positions round)</option>
+            <option value="1" data-i18n="lane_opt_1">Rotate After Every Game</option>
+            <option value="2" data-i18n="lane_opt_2">Rotate After Two Games</option>
         </select>
     </div>
 
@@ -225,13 +229,11 @@
         <p style="color: var(--text-muted);" data-i18n="input_desc">Score entry matrix will render here once a match is selected.</p>
     </div>
     
-    <div style="display: flex; gap: 10px; margin-top: 20px;">
-        <button id="commit-scores-btn" class="hidden" onclick="alert(getTranslation('alert_telemetry_saved'))" style="flex: 1; border-color: var(--neon-teal);" data-i18n="btn_commit_scores">Commit Match Scores</button>
-        <button id="generate-next-btn" class="hidden" onclick="generateNextGameMatches()" style="flex: 1; border-color: #a855f7; color: #a855f7;" data-i18n="btn_generate_next">Generate Matches for Next Game</button>
-    </div>
+    <button id="commit-scores-btn" class="hidden" onclick="alert(getTranslation('alert_telemetry_saved'))" style="margin-top: 20px; width: 100%; border-color: var(--neon-teal);" data-i18n="btn_commit_scores">Commit Match Scores</button>
 </div>
 
 <script>
+    // --- Localization (Mexican Spanish) ---
     const dict = {
         en: {
             subtitle: "Synergy Experts", btn_login: "System Admin", btn_logout: "Disconnect",
@@ -240,13 +242,10 @@
             nav_import: "📂 Import JSON", nav_purge: "🗑️ Purge System",
             results_title: "TOURNAMENT TELEMETRY", results_desc: "Real-time standings and individual division results will populate here.",
             matches_title: "MATCH ANALYTICS", matches_desc: "Public access grid for team match-ups and game scores.",
-            setup_title: "SYSTEM CONFIGURATION", setup_roster: "Team & Player Roster Setup", 
-            setup_divs: "Number of Divisions", div_name_placeholder: "Division Name",
-            setup_lanes: "Lane Allocation & Movement Protocol", 
-            lane_opt_none: "Static Alignment - No Movement", lane_opt_r1: "One pair to the right", lane_opt_l1: "One pair to the left",
-            lane_opt_erol1: "Evens to the right / Odds to the left (1 pair)", lane_opt_erol2: "Evens to the right / Odds to the left (2 pair)",
-            lane_opt_posR1: "Positions round (Move 1 pair right)", lane_opt_fan: "Fan spread / Abanico (Positions round)",
-            setup_score: "Scoring Protocol", score_opt_team: "Team Win/Loss Absolute", score_opt_player: "Individual + Team Aggregation",
+            setup_title: "SYSTEM CONFIGURATION", setup_roster: "Team & Player Roster Setup", setup_divs: "Division Stratification",
+            setup_lanes: "Lane Allocation & Movement Protocol", lane_opt_none: "Static Alignment - No Movement",
+            lane_opt_1: "Rotate After Every Game", lane_opt_2: "Rotate After Two Games", setup_score: "Scoring Protocol",
+            score_opt_team: "Team Win/Loss Absolute", score_opt_player: "Individual + Team Aggregation",
             setup_cycles: "Total Cycle Count (Games)", setup_finals: "Finals Bracket Architecture", finals_opt_step: "Stepladder Progression",
             finals_opt_round: "Round Robin Matrix", finals_opt_pins: "Total Pins Output (Simultaneous)", finals_opt_baker: "Baker System Alternation",
             setup_hc: "Handicap Algorithm", btn_lock: "Lock Parameters",
@@ -254,11 +253,9 @@
             btn_deploy: "Deploy Roster Matrix", btn_test: "🧪 Inject Test Data", btn_commit_roster: "Commit Roster Data & Generate Matches",
             input_title: "DATA ENTRY NODE", input_target: "Target Matchup Sequence:", input_awaiting: "-- Awaiting Match Generation --",
             input_desc: "Score entry matrix will render here once a match is selected.", btn_commit_scores: "Commit Match Scores",
-            btn_generate_next: "Generate Matches for Next Game",
             alert_telemetry_saved: "Telemetry Saved!", alert_access_denied: "Access Denied.", prompt_admin: "Awaiting System Override (demo: admin):",
             alert_params_locked: "Parameters locked. Proceed to Roster Node.", alert_sys_error: "System Error: Please assign Total Teams and Players per Team in the Parameters tab first.",
             alert_roster_committed: "Roster committed. Matchups successfully generated in Input Matrix.", alert_data_imported: "External data core integrated successfully!",
-            alert_next_generated: "New matchups generated based on standings and selected lane movement protocol.",
             confirm_purge: "CRITICAL WARNING: Purge all tournament telemetry?", confirm_purge_2: "FINAL OVERRIDE: This action is irreversible. Execute purge?",
             alert_purged: "System purged. Ready for new input.", placeholder_team: "Enter Team Name", placeholder_bowler: "Bowler Name"
         },
@@ -269,13 +266,10 @@
             nav_import: "📂 Importar JSON", nav_purge: "🗑️ Borrar Sistema",
             results_title: "TELEMETRÍA DEL TORNEO", results_desc: "La tabla de posiciones en tiempo real y resultados individuales aparecerán aquí.",
             matches_title: "ANÁLISIS DE PARTIDAS", matches_desc: "Vista pública de los enfrentamientos por equipo y puntuaciones.",
-            setup_title: "CONFIGURACIÓN DEL SISTEMA", setup_roster: "Configuración de Equipos y Jugadores", 
-            setup_divs: "Cantidad de Divisiones", div_name_placeholder: "Nombre de la División",
-            setup_lanes: "Asignación de Pistas y Rotación", 
-            lane_opt_none: "Alineación Estática - Sin Movimiento", lane_opt_r1: "Un par a la derecha", lane_opt_l1: "Un par a la izquierda",
-            lane_opt_erol1: "Pares a la derecha / Nones a la izquierda (1 par)", lane_opt_erol2: "Pares a la derecha / Nones a la izquierda (2 pares)",
-            lane_opt_posR1: "Ronda de posiciones (1 par a la derecha)", lane_opt_fan: "Abanico / Fan spread (Ronda de posiciones)",
-            setup_score: "Sistema de Puntuación", score_opt_team: "Ganados/Perdidos por Equipo", score_opt_player: "Puntos Individuales + Puntos por Equipo",
+            setup_title: "CONFIGURACIÓN DEL SISTEMA", setup_roster: "Configuración de Equipos y Jugadores", setup_divs: "Estratificación de Divisiones",
+            setup_lanes: "Asignación de Pistas y Rotación", lane_opt_none: "Alineación Estática - Sin Movimiento",
+            lane_opt_1: "Rotar Después de Cada Juego", lane_opt_2: "Rotar Después de Dos Juegos", setup_score: "Sistema de Puntuación",
+            score_opt_team: "Ganados/Perdidos por Equipo", score_opt_player: "Puntos Individuales + Puntos por Equipo",
             setup_cycles: "Total de Líneas (Juegos)", setup_finals: "Formato de Finales", finals_opt_step: "Escalera (Stepladder)",
             finals_opt_round: "Todos contra Todos (Round Robin)", finals_opt_pins: "Pinos Totales (Simultáneo)", finals_opt_baker: "Formato Baker",
             setup_hc: "Algoritmo de Hándicap (Ventaja)", btn_lock: "Guardar Parámetros",
@@ -283,11 +277,9 @@
             btn_deploy: "Generar Matriz de Equipos", btn_test: "🧪 Inyectar Datos de Prueba", btn_commit_roster: "Guardar Equipos y Generar Partidas",
             input_title: "NODO DE CAPTURA DE DATOS", input_target: "Partida Objetivo:", input_awaiting: "-- Esperando Generación de Partidas --",
             input_desc: "La cuadrícula de resultados aparecerá al seleccionar una partida.", btn_commit_scores: "Guardar Resultados de la Partida",
-            btn_generate_next: "Generar Partidas para Siguiente Juego",
             alert_telemetry_saved: "¡Datos guardados con éxito!", alert_access_denied: "Acceso Denegado.", prompt_admin: "Ingrese contraseña (demo: admin):",
             alert_params_locked: "Parámetros guardados. Proceda a la pestaña de Equipos.", alert_sys_error: "Error del Sistema: Asigne el total de equipos y jugadores por equipo en Parámetros primero.",
             alert_roster_committed: "Equipos guardados. Partidas generadas exitosamente en la Captura de Resultados.", alert_data_imported: "¡Datos externos integrados exitosamente!",
-            alert_next_generated: "Nuevas partidas generadas basadas en posiciones y el protocolo de movimiento seleccionado.",
             confirm_purge: "ADVERTENCIA CRÍTICA: ¿Eliminar todos los datos del torneo?", confirm_purge_2: "CONFIRMACIÓN FINAL: Esta acción es irreversible. ¿Proceder?",
             alert_purged: "Sistema borrado. Listo para nuevos datos.", placeholder_team: "Nombre del Equipo", placeholder_bowler: "Nombre del Jugador"
         }
@@ -299,33 +291,24 @@
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (dict[currentLang][key]) {
-                if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'number')) el.placeholder = dict[currentLang][key];
+                if (el.tagName === 'INPUT' && el.type === 'text') el.placeholder = dict[currentLang][key];
                 else el.textContent = dict[currentLang][key];
             }
         });
-        document.querySelectorAll('input[id^="div-name-"]').forEach(el => { el.placeholder = getTranslation('div_name_placeholder'); });
-        document.querySelectorAll('input[id^="team-"][id$="-name"]').forEach(el => { el.placeholder = getTranslation('placeholder_team'); });
-        document.querySelectorAll('input[id*="-player-"]').forEach(el => { el.placeholder = getTranslation('placeholder_bowler'); });
         document.documentElement.lang = currentLang;
     }
 
     function toggleLanguage() {
         currentLang = currentLang === 'en' ? 'es' : 'en';
-        localStorage.setItem('ilusion_lang', currentLang); applyLanguage();
+        localStorage.setItem('ilusion_lang', currentLang);
+        applyLanguage();
     }
     
     function getTranslation(key) { return dict[currentLang][key] || key; }
 
+    // --- Core Application Logic ---
     let isAdmin = false;
-    let tournamentData = { teams: [], matches: [], config: {} };
-    
-    try {
-        const stored = localStorage.getItem('ilusion_tournament');
-        if (stored) { tournamentData = JSON.parse(stored); }
-    } catch (e) {
-        console.error("Local storage parsing failed. Purging bad data.");
-        localStorage.removeItem('ilusion_tournament');
-    }
+    let tournamentData = JSON.parse(localStorage.getItem('ilusion_tournament')) || { teams: [], matches: [], config: {} };
 
     window.onload = () => { applyLanguage(); if(tournamentData.matches && tournamentData.matches.length > 0) populateMatchDropdown(); };
 
@@ -351,25 +334,10 @@
         document.getElementById(pageId).classList.remove('hidden');
     }
 
-    function renderDivisionInputs() {
-        const count = parseInt(document.getElementById('num-divisions').value) || 0;
-        const container = document.getElementById('division-names-container');
-        container.innerHTML = '';
-        for(let i=1; i<=count; i++) {
-            container.innerHTML += `<input type="text" id="div-name-${i}" placeholder="${getTranslation('div_name_placeholder')} ${i}">`;
-        }
-    }
-
     function saveParameters() {
-        let divisions = [];
-        const divCount = parseInt(document.getElementById('num-divisions').value) || 0;
-        for(let i=1; i<=divCount; i++) {
-            let el = document.getElementById(`div-name-${i}`);
-            if(el) divisions.push(el.value || `Division ${i}`);
-        }
         tournamentData.config = {
             qtyTeams: document.getElementById('qty-teams').value, qtyPlayers: document.getElementById('qty-players').value,
-            divisions: divisions, laneStart: document.getElementById('lane-start').value, laneEnd: document.getElementById('lane-end').value,
+            laneStart: document.getElementById('lane-start').value, laneEnd: document.getElementById('lane-end').value,
             laneMovement: document.getElementById('lane-movement').value, totalGames: document.getElementById('total-games').value
         };
         saveData(); alert(getTranslation('alert_params_locked'));
@@ -379,15 +347,20 @@
         const qtyTeams = parseInt(document.getElementById('qty-teams').value) || 0;
         const qtyPlayers = parseInt(document.getElementById('qty-players').value) || 0;
         const container = document.getElementById('roster-forms-container');
+        
         if(qtyTeams === 0 || qtyPlayers === 0) { alert(getTranslation('alert_sys_error')); return; }
+
         let html = '';
         for(let t = 1; t <= qtyTeams; t++) {
-            html += `<div class="team-card"><div class="form-group"><label>Squad 0${t}</label><input type="text" id="team-${t}-name" placeholder="${getTranslation('placeholder_team')}"></div><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">`;
+            html += `<div class="team-card">
+                        <div class="form-group"><label>Squad 0${t}</label><input type="text" id="team-${t}-name" placeholder="${getTranslation('placeholder_team')}"></div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">`;
             for(let p = 1; p <= qtyPlayers; p++) {
                 html += `<div><label style="font-size: 11px; color: var(--text-muted);">BOWLER 0${p}</label><input type="text" id="team-${t}-player-${p}" placeholder="${getTranslation('placeholder_bowler')}"></div>`;
             }
             html += `</div></div>`;
         }
+        
         container.innerHTML = html;
         document.getElementById('save-roster-btn').classList.remove('hidden'); document.getElementById('test-data-btn').classList.remove('hidden');
     }
@@ -397,6 +370,7 @@
         const playerNames = ["Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Jamie", "Oscar", "Luis", "Gomez", "Emma", "Noah"];
         const qtyTeams = parseInt(document.getElementById('qty-teams').value) || 0;
         const qtyPlayers = parseInt(document.getElementById('qty-players').value) || 0;
+
         for(let t = 1; t <= qtyTeams; t++) {
             document.getElementById(`team-${t}-name`).value = teamNames[Math.floor(Math.random() * teamNames.length)] + " " + t;
             for(let p = 1; p <= qtyPlayers; p++) {
@@ -416,11 +390,13 @@
             teams.push({ id: t, name: teamName, players: players });
         }
         tournamentData.teams = teams;
+        
         let matches = [];
         for(let i = 0; i < teams.length; i += 2) {
-            if(teams[i+1]) matches.push({ id: (i/2)+1, round: 1, teamA: teams[i], teamB: teams[i+1] });
+            if(teams[i+1]) matches.push({ id: (i/2)+1, teamA: teams[i], teamB: teams[i+1] });
         }
         tournamentData.matches = matches;
+        
         saveData(); populateMatchDropdown(); alert(getTranslation('alert_roster_committed'));
     }
 
@@ -428,16 +404,8 @@
         let select = document.getElementById('match-selector');
         select.innerHTML = `<option value="">${getTranslation('input_awaiting')}</option>`;
         if(tournamentData.matches && tournamentData.matches.length > 0) {
-            tournamentData.matches.forEach(m => { select.innerHTML += `<option value="${m.id}">Round ${m.round || 1} - Match ${m.id}: ${m.teamA.name} vs ${m.teamB.name}</option>`; });
+            tournamentData.matches.forEach(m => { select.innerHTML += `<option value="${m.id}">Match ${m.id}: ${m.teamA.name} vs ${m.teamB.name}</option>`; });
         }
-        toggleGenerateNextButton();
-    }
-
-    function toggleGenerateNextButton() {
-        let btnNext = document.getElementById('generate-next-btn');
-        let laneMov = tournamentData.config?.laneMovement || 'none';
-        if(laneMov !== 'none' && tournamentData.matches.length > 0) { btnNext.classList.remove('hidden'); } 
-        else { btnNext.classList.add('hidden'); }
     }
 
     function renderScoreMatrix() {
@@ -448,12 +416,13 @@
         if(!matchId) { container.innerHTML = `<p style="color: var(--text-muted);">${getTranslation('input_desc')}</p>`; btn.classList.add('hidden'); return; }
         
         let match = tournamentData.matches.find(m => m.id == matchId);
-        let totalGames = parseInt(tournamentData.config?.totalGames) || 3;
-        let laneMovement = tournamentData.config?.laneMovement || 'none';
+        let totalGames = parseInt(document.getElementById('total-games').value) || 3;
+        let laneMovement = document.getElementById('lane-movement').value || 'none';
         
         let html = `<div style="display: flex; flex-direction: column; gap: 20px;">`;
         const generateTeamTable = (team, color) => {
-            let table = `<div><h4 style="color: ${color}; margin-bottom: 5px; text-transform: uppercase;">${team.name}</h4><table class="score-grid"><tr><th>Player / Metric</th>`;
+            let table = `<div><h4 style="color: ${color}; margin-bottom: 5px; text-transform: uppercase;">${team.name}</h4>
+                         <table class="score-grid"><tr><th>Player / Metric</th>`;
             for(let g=1; g<=totalGames; g++) table += `<th>Game ${g}</th>`;
             table += `<th>Total</th></tr>`;
             
@@ -462,7 +431,8 @@
                 for(let g=1; g<=totalGames; g++) table += `<td><input type="text" class="lane-input" placeholder="#" title="Assign lane for Game ${g}"></td>`;
                 table += `<td>-</td></tr>`;
             } else {
-                table += `<tr><td style="font-weight:600; text-align:left; color: var(--neon-copper); font-size: 11px;">PISTA (STATIC)</td><td colspan="${totalGames}"><input type="text" class="lane-input" placeholder="Pair (e.g. 1-2)" style="width: 90%;"></td><td>-</td></tr>`;
+                table += `<tr><td style="font-weight:600; text-align:left; color: var(--neon-copper); font-size: 11px;">PISTA (STATIC)</td>`;
+                table += `<td colspan="${totalGames}"><input type="text" class="lane-input" placeholder="Pair (e.g. 1-2)" style="width: 90%;"></td><td>-</td></tr>`;
             }
 
             team.players.forEach((player) => {
@@ -470,16 +440,12 @@
                 for(let g=1; g<=totalGames; g++) table += `<td><input type="number" min="0" max="300" placeholder="0"></td>`;
                 table += `<td><input type="number" readonly style="background:transparent; border:none; color:var(--text-main);"></td></tr>`;
             });
-            table += `</table></div>`; return table;
+            table += `</table></div>`;
+            return table;
         };
 
         html += generateTeamTable(match.teamA, 'var(--neon-teal)') + generateTeamTable(match.teamB, 'var(--neon-copper)') + `</div>`;
         container.innerHTML = html; btn.classList.remove('hidden');
-    }
-
-    function generateNextGameMatches() {
-        let protocol = tournamentData.config.laneMovement;
-        alert(`${getTranslation('alert_next_generated')}\n\nProtocol Applied: ${protocol}`);
     }
 
     function exportData() {
@@ -494,7 +460,8 @@
         reader.onload = function(e) {
             tournamentData = JSON.parse(e.target.result); saveData(); populateMatchDropdown();
             alert(getTranslation('alert_data_imported'));
-        }; reader.readAsText(file);
+        };
+        reader.readAsText(file);
     }
 
     function deleteData() {
@@ -503,11 +470,9 @@
                 tournamentData = { teams: [], matches: [], config: {} }; localStorage.removeItem('ilusion_tournament');
                 document.querySelectorAll('input').forEach(input => input.value = '');
                 document.getElementById('roster-forms-container').innerHTML = '';
-                document.getElementById('division-names-container').innerHTML = '';
                 document.getElementById('save-roster-btn').classList.add('hidden'); document.getElementById('test-data-btn').classList.add('hidden');
                 document.getElementById('match-selector').innerHTML = `<option value="">${getTranslation('input_awaiting')}</option>`;
                 document.getElementById('score-matrix-container').innerHTML = '';
-                document.getElementById('generate-next-btn').classList.add('hidden');
                 alert(getTranslation('alert_purged')); showPage('page-setup');
             }
         }
