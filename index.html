@@ -76,11 +76,9 @@
         .score-grid { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(0, 0, 0, 0.2); border-radius: 6px; overflow: hidden; }
         .score-grid th, .score-grid td { padding: 10px; text-align: center; border: 1px solid #334155; }
         .score-grid th { background: rgba(0, 229, 255, 0.1); color: var(--neon-teal); font-size: 12px; text-transform: uppercase; }
-        .score-grid input { width: 60px; padding: 8px; text-align: center; }
+        .score-grid input { width: 80px; padding: 8px; text-align: center; }
         .lane-input { background: rgba(226, 135, 67, 0.1) !important; border-color: var(--neon-copper-dim) !important; color: var(--neon-copper) !important; }
         
-        /* Highlight active game column */
-        .active-game-col { background: rgba(0, 229, 255, 0.05) !important; }
         .active-game-input { background: rgba(255,255,255,0.1) !important; border-color: var(--neon-teal) !important; }
 
         h3 { color: #fff; border-bottom: 1px solid var(--neon-teal-dim); padding-bottom: 15px; margin-top: 0; font-weight: 300; letter-spacing: 1px; }
@@ -199,13 +197,10 @@
     
     <div class="form-group">
         <label data-i18n="setup_hc">Handicap Algorithm</label>
-        <div style="display: flex; gap: 15px; margin-bottom: 10px;">
-            <input type="number" id="hc-base" placeholder="Base Avg (e.g. 200)" style="width: 25%;">
-            <input type="number" id="hc-perc" placeholder="Multiplier % (e.g. 80)" style="width: 25%;">
-            <input type="number" id="hc-min" placeholder="Min HDCP (e.g. 0)" style="width: 25%;">
-            <input type="number" id="hc-max" placeholder="Max HDCP (e.g. 50)" style="width: 25%;">
+        <div id="handicap-rules-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px;">
+            <!-- Dynamic HC rules based on divisions inject here -->
         </div>
-        <span style="font-size: 11px; color: var(--text-muted);" data-i18n="setup_hc_note">* General min/max rules apply globally if divisions are not separated by handicap constraints.</span>
+        <span style="font-size: 11px; color: var(--text-muted);" data-i18n="setup_hc_note">* Define rules per individual division. Defaults to Global if no divisions are set.</span>
     </div>
     
     <button onclick="saveParameters()" style="margin-top: 10px; width: 100%; border-color: var(--neon-copper); color: var(--neon-copper);" data-i18n="btn_lock">Lock Parameters</button>
@@ -263,7 +258,7 @@
             setup_score: "Scoring Protocol", score_opt_team: "Team Win/Loss Absolute", score_opt_player: "Individual + Team Aggregation",
             setup_cycles: "Total Cycle Count (Games)", setup_finals: "Finals Bracket Architecture", finals_opt_step: "Stepladder Progression",
             finals_opt_round: "Round Robin Matrix", finals_opt_pins: "Total Pins Output (Simultaneous)", finals_opt_baker: "Baker System Alternation",
-            setup_hc: "Handicap Algorithm", setup_hc_note: "* General min/max rules apply globally if divisions are not separated by handicap constraints.",
+            setup_hc: "Handicap Algorithm", setup_hc_note: "* Define rules per individual division. Defaults to Global if no divisions are set.",
             btn_lock: "Lock Parameters",
             roster_title: "ROSTER INITIALIZATION", roster_desc: "Deploy input fields based on the quantities established in Parameters.",
             btn_deploy: "Deploy Roster Matrix", btn_test: "🧪 Inject Test Data", btn_commit_roster: "Commit Roster Data & Generate Matches",
@@ -277,7 +272,7 @@
             confirm_purge: "CRITICAL WARNING: Purge all tournament telemetry?", confirm_purge_2: "FINAL OVERRIDE: This action is irreversible. Execute purge?",
             alert_purged: "System purged. Ready for new input.", placeholder_team: "Enter Team Name", placeholder_bowler: "Bowler Name",
             ph_qty_team_divs: "Number of Team Divisions (e.g. 2)", ph_qty_bowler_divs: "Number of Bowler Divisions (e.g. 4)",
-            ph_hc_min: "Min HDCP (e.g. 0)", ph_hc_max: "Max HDCP (e.g. 50)", ph_avg: "Avg"
+            ph_hc_base: "Base Avg", ph_hc_perc: "% Multiplier", ph_hc_min: "Min HDCP", ph_hc_max: "Max HDCP", ph_avg: "Avg"
         },
         es: {
             subtitle: "Expertos en Sinergia", btn_login: "Administrador", btn_logout: "Desconectar",
@@ -296,7 +291,7 @@
             setup_score: "Sistema de Puntuación", score_opt_team: "Ganados/Perdidos por Equipo", score_opt_player: "Puntos Individuales + Puntos por Equipo",
             setup_cycles: "Total de Líneas (Juegos)", setup_finals: "Formato de Finales", finals_opt_step: "Escalera (Stepladder)",
             finals_opt_round: "Todos contra Todos (Round Robin)", finals_opt_pins: "Pinos Totales (Simultáneo)", finals_opt_baker: "Formato Baker",
-            setup_hc: "Algoritmo de Hándicap (Ventaja)", setup_hc_note: "* Reglas generales de min/max aplican globalmente si las divisiones no están separadas por restricciones de ventaja.",
+            setup_hc: "Algoritmo de Hándicap (Ventaja)", setup_hc_note: "* Define reglas por división individual. Usa Global si no hay divisiones.",
             btn_lock: "Guardar Parámetros",
             roster_title: "INICIALIZACIÓN DE EQUIPOS", roster_desc: "Despliega los campos según las cantidades definidas en Parámetros.",
             btn_deploy: "Generar Matriz de Equipos", btn_test: "🧪 Inyectar Datos de Prueba", btn_commit_roster: "Guardar Equipos y Generar Partidas",
@@ -310,7 +305,7 @@
             confirm_purge: "ADVERTENCIA CRÍTICA: ¿Eliminar todos los datos del torneo?", confirm_purge_2: "CONFIRMACIÓN FINAL: Esta acción es irreversible. ¿Proceder?",
             alert_purged: "Sistema borrado. Listo para nuevos datos.", placeholder_team: "Nombre del Equipo", placeholder_bowler: "Nombre del Jugador",
             ph_qty_team_divs: "Cantidad Div. de Equipo (ej. 2)", ph_qty_bowler_divs: "Cantidad Div. de Jugadores (ej. 4)",
-            ph_hc_min: "HDCP Min (ej. 0)", ph_hc_max: "HDCP Max (ej. 50)", ph_avg: "Prom."
+            ph_hc_base: "Prom. Base", ph_hc_perc: "% Multiplicador", ph_hc_min: "HDCP Min", ph_hc_max: "HDCP Max", ph_avg: "Prom."
         }
     };
 
@@ -327,12 +322,16 @@
         
         document.getElementById('qty-team-divs').placeholder = getTranslation('ph_qty_team_divs');
         document.getElementById('qty-bowler-divs').placeholder = getTranslation('ph_qty_bowler_divs');
-        document.getElementById('hc-min').placeholder = getTranslation('ph_hc_min');
-        document.getElementById('hc-max').placeholder = getTranslation('ph_hc_max');
+        
+        document.querySelectorAll('input[id^="hc-base-"]').forEach(el => el.placeholder = getTranslation('ph_hc_base'));
+        document.querySelectorAll('input[id^="hc-perc-"]').forEach(el => el.placeholder = getTranslation('ph_hc_perc'));
+        document.querySelectorAll('input[id^="hc-min-"]').forEach(el => el.placeholder = getTranslation('ph_hc_min'));
+        document.querySelectorAll('input[id^="hc-max-"]').forEach(el => el.placeholder = getTranslation('ph_hc_max'));
+
         document.querySelectorAll('input[id^="team-div-name-"], input[id^="bowler-div-name-"]').forEach(el => { el.placeholder = getTranslation('div_name_placeholder'); });
         document.querySelectorAll('input[id^="team-"][id$="-name"]').forEach(el => { el.placeholder = getTranslation('placeholder_team'); });
         document.querySelectorAll('input[id*="-player-"][id$="-avg"]').forEach(el => { el.placeholder = getTranslation('ph_avg'); });
-        document.querySelectorAll('input[id*="-player-"]:not([id$="-avg"])').forEach(el => { el.placeholder = getTranslation('placeholder_bowler'); });
+        document.querySelectorAll('input[id*="-player-"]:not([id$="-avg"]):not([id$="-div"])').forEach(el => { el.placeholder = getTranslation('placeholder_bowler'); });
         document.documentElement.lang = currentLang;
     }
 
@@ -350,11 +349,14 @@
         const stored = localStorage.getItem('ilusion_tournament');
         if (stored) { tournamentData = JSON.parse(stored); }
     } catch (e) {
-        console.error("Local storage parsing failed. Purging bad data.");
         localStorage.removeItem('ilusion_tournament');
     }
 
-    window.onload = () => { applyLanguage(); if(tournamentData.matches && tournamentData.matches.length > 0) populateMatchDropdown(); };
+    window.onload = () => { 
+        applyLanguage(); 
+        renderHandicapInputs();
+        if(tournamentData.matches && tournamentData.matches.length > 0) populateMatchDropdown(); 
+    };
 
     function toggleAdmin() {
         if(!isAdmin) {
@@ -392,12 +394,50 @@
         const container = document.getElementById('bowler-division-names-container');
         container.innerHTML = '';
         for(let i=1; i<=count; i++) {
-            container.innerHTML += `<input type="text" id="bowler-div-name-${i}" placeholder="${getTranslation('div_name_placeholder')} ${i}">`;
+            container.innerHTML += `<input type="text" id="bowler-div-name-${i}" placeholder="${getTranslation('div_name_placeholder')} ${i}" oninput="updateHcLabels()">`;
+        }
+        renderHandicapInputs();
+    }
+
+    function updateHcLabels() {
+        const count = parseInt(document.getElementById('qty-bowler-divs').value) || 0;
+        for(let i=1; i<=count; i++) {
+            let name = document.getElementById(`bowler-div-name-${i}`)?.value || `${getTranslation('div_name_placeholder')} ${i}`;
+            let lbl = document.getElementById(`hc-lbl-${i}`);
+            if(lbl) lbl.innerText = name;
         }
     }
 
+    function renderHandicapInputs() {
+        const count = parseInt(document.getElementById('qty-bowler-divs').value) || 0;
+        const container = document.getElementById('handicap-rules-container');
+        container.innerHTML = '';
+        
+        const createHcRow = (label, id) => `
+            <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px;">
+                <label id="hc-lbl-${id}" style="font-size: 11px; color: var(--neon-teal); margin-bottom: 5px; font-weight: 800;">${label}</label>
+                <div style="display: flex; gap: 15px;">
+                    <input type="number" id="hc-base-${id}" placeholder="${getTranslation('ph_hc_base')}" style="flex: 1;">
+                    <input type="number" id="hc-perc-${id}" placeholder="${getTranslation('ph_hc_perc')}" style="flex: 1;">
+                    <input type="number" id="hc-min-${id}" placeholder="${getTranslation('ph_hc_min')}" style="flex: 1;">
+                    <input type="number" id="hc-max-${id}" placeholder="${getTranslation('ph_hc_max')}" style="flex: 1;">
+                </div>
+            </div>`;
+
+        if (count === 0) {
+            container.innerHTML = createHcRow('GLOBAL HANDICAP', 'global');
+        } else {
+            for(let i=1; i<=count; i++) {
+                let divName = document.getElementById(`bowler-div-name-${i}`)?.value || `${getTranslation('div_name_placeholder')} ${i}`;
+                container.innerHTML += createHcRow(divName, i);
+            }
+        }
+        applyLanguage();
+    }
+
     function saveParameters() {
-        let teamDivs = [], bowlerDivs = [];
+        let teamDivs = [], bowlerDivs = [], hcRules = {};
+        
         const tCount = parseInt(document.getElementById('qty-team-divs').value) || 0;
         for(let i=1; i<=tCount; i++) {
             let el = document.getElementById(`team-div-name-${i}`);
@@ -405,9 +445,24 @@
         }
         
         const bCount = parseInt(document.getElementById('qty-bowler-divs').value) || 0;
-        for(let i=1; i<=bCount; i++) {
-            let el = document.getElementById(`bowler-div-name-${i}`);
-            if(el) bowlerDivs.push(el.value || `Bowler Div ${i}`);
+        if (bCount === 0) {
+            hcRules['global'] = {
+                base: document.getElementById('hc-base-global')?.value,
+                perc: document.getElementById('hc-perc-global')?.value,
+                min: document.getElementById('hc-min-global')?.value,
+                max: document.getElementById('hc-max-global')?.value
+            };
+        } else {
+            for(let i=1; i<=bCount; i++) {
+                let divName = document.getElementById(`bowler-div-name-${i}`)?.value || `Bowler Div ${i}`;
+                bowlerDivs.push(divName);
+                hcRules[divName] = {
+                    base: document.getElementById(`hc-base-${i}`)?.value,
+                    perc: document.getElementById(`hc-perc-${i}`)?.value,
+                    min: document.getElementById(`hc-min-${i}`)?.value,
+                    max: document.getElementById(`hc-max-${i}`)?.value
+                };
+            }
         }
 
         tournamentData.config = {
@@ -415,14 +470,11 @@
             qtyPlayers: document.getElementById('qty-players').value,
             teamDivisions: teamDivs, 
             bowlerDivisions: bowlerDivs, 
+            hcRules: hcRules,
             laneStart: document.getElementById('lane-start').value, 
             laneEnd: document.getElementById('lane-end').value,
             laneMovement: document.getElementById('lane-movement').value, 
-            totalGames: document.getElementById('total-games').value,
-            hcBase: document.getElementById('hc-base').value,
-            hcPerc: document.getElementById('hc-perc').value,
-            hcMin: document.getElementById('hc-min').value,
-            hcMax: document.getElementById('hc-max').value
+            totalGames: document.getElementById('total-games').value
         };
         saveData(); alert(getTranslation('alert_params_locked'));
     }
@@ -448,7 +500,7 @@
             html += `<div class="team-card">
                         <div class="form-group" style="display:flex; gap:15px; margin-bottom: 25px;">
                             <input type="text" id="team-${t}-name" placeholder="${getTranslation('placeholder_team')}" style="flex:2;">
-                            <select id="team-${t}-div" style="flex:1;">${tOptions}</select>
+                            ${teamDivs.length > 0 ? `<select id="team-${t}-div" style="flex:1;">${tOptions}</select>` : ''}
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">`;
             for(let p = 1; p <= qtyPlayers; p++) {
@@ -456,7 +508,7 @@
                             <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">BOWLER 0${p}</label>
                             <input type="text" id="team-${t}-player-${p}" placeholder="${getTranslation('placeholder_bowler')}" style="margin-bottom: 8px;">
                             <div style="display:flex; gap:5px;">
-                                <select id="team-${t}-player-${p}-div" style="flex:2;">${bOptions}</select>
+                                ${bowlerDivs.length > 0 ? `<select id="team-${t}-player-${p}-div" style="flex:2;">${bOptions}</select>` : ''}
                                 <input type="number" id="team-${t}-player-${p}-avg" placeholder="${getTranslation('ph_avg')}" style="flex:1;">
                             </div>
                          </div>`;
@@ -477,12 +529,15 @@
 
         for(let t = 1; t <= qtyTeams; t++) {
             document.getElementById(`team-${t}-name`).value = teamNames[Math.floor(Math.random() * teamNames.length)] + " " + t;
-            if(tDivs.length > 0) document.getElementById(`team-${t}-div`).value = tDivs[Math.floor(Math.random() * tDivs.length)];
-            
+            if(tDivs.length > 0 && document.getElementById(`team-${t}-div`)) {
+                document.getElementById(`team-${t}-div`).value = tDivs[Math.floor(Math.random() * tDivs.length)];
+            }
             for(let p = 1; p <= qtyPlayers; p++) {
                 document.getElementById(`team-${t}-player-${p}`).value = playerNames[Math.floor(Math.random() * playerNames.length)] + " " + p;
                 document.getElementById(`team-${t}-player-${p}-avg`).value = Math.floor(Math.random() * (220 - 150 + 1)) + 150;
-                if(bDivs.length > 0) document.getElementById(`team-${t}-player-${p}-div`).value = bDivs[Math.floor(Math.random() * bDivs.length)];
+                if(bDivs.length > 0 && document.getElementById(`team-${t}-player-${p}-div`)) {
+                    document.getElementById(`team-${t}-player-${p}-div`).value = bDivs[Math.floor(Math.random() * bDivs.length)];
+                }
             }
         }
     }
@@ -541,9 +596,7 @@
         
         if(!gameId) { container.innerHTML = `<p style="color: var(--text-muted);">${getTranslation('input_desc')}</p>`; btn.classList.add('hidden'); return; }
         
-        let totalGames = parseInt(tournamentData.config?.totalGames) || 3;
         let laneMovement = tournamentData.config?.laneMovement || 'none';
-        
         let html = '';
         
         tournamentData.matches.forEach(match => {
@@ -553,23 +606,15 @@
             
             const generateTeamTable = (team, color) => {
                 let tDivText = team.division ? `<span style="font-size: 11px; color: var(--text-muted);">(${team.division})</span>` : "";
-                let table = `<div><h5 style="color: ${color}; margin-bottom: 5px; text-transform: uppercase;">${team.name} ${tDivText}</h5><table class="score-grid"><tr><th>Player / Metric</th>`;
-                
-                for(let g=1; g<=totalGames; g++) {
-                    let bg = (g == gameId) ? 'class="active-game-col"' : '';
-                    table += `<th ${bg}>Game ${g}</th>`;
-                }
-                table += `<th>Total</th></tr>`;
+                let table = `<div><h5 style="color: ${color}; margin-bottom: 5px; text-transform: uppercase;">${team.name} ${tDivText}</h5>
+                             <table class="score-grid"><tr><th>Player / Metric</th><th class="active-game-col">Game ${gameId}</th><th>Total</th></tr>`;
                 
                 if(laneMovement !== 'none') {
-                    table += `<tr><td style="font-weight:600; text-align:left; color: var(--neon-copper); font-size: 11px;">PISTA / LANE</td>`;
-                    for(let g=1; g<=totalGames; g++) {
-                        let bg = (g == gameId) ? 'class="lane-input active-game-col"' : 'class="lane-input"';
-                        table += `<td ${bg}><input type="text" class="lane-input" placeholder="#" title="Assign lane for Game ${g}"></td>`;
-                    }
-                    table += `<td>-</td></tr>`;
+                    table += `<tr><td style="font-weight:600; text-align:left; color: var(--neon-copper); font-size: 11px;">PISTA / LANE</td>
+                              <td class="active-game-col"><input type="text" class="lane-input" placeholder="#" style="width: 100%;"></td><td>-</td></tr>`;
                 } else {
-                    table += `<tr><td style="font-weight:600; text-align:left; color: var(--neon-copper); font-size: 11px;">PISTA (STATIC)</td><td colspan="${totalGames}"><input type="text" class="lane-input" placeholder="Pair (e.g. 1-2)" style="width: 90%;"></td><td>-</td></tr>`;
+                    table += `<tr><td style="font-weight:600; text-align:left; color: var(--neon-copper); font-size: 11px;">PISTA (STATIC)</td>
+                              <td class="active-game-col"><input type="text" class="lane-input" placeholder="Pair" style="width: 100%;"></td><td>-</td></tr>`;
                 }
 
                 team.players.forEach((player) => {
@@ -577,13 +622,8 @@
                     let pAvg = typeof player === 'object' && player.avg ? ` (Avg: ${player.avg})` : "";
                     let pDiv = typeof player === 'object' && player.division ? `<br><span style="font-size: 10px; color: var(--text-muted);">${player.division}</span>` : "";
                     table += `<tr><td style="font-weight:600; text-align:left;">${pName}${pAvg} ${pDiv}</td>`;
-                    
-                    for(let g=1; g<=totalGames; g++) {
-                        let inputClass = (g == gameId) ? 'class="active-game-input"' : '';
-                        let colClass = (g == gameId) ? 'class="active-game-col"' : '';
-                        table += `<td ${colClass}><input type="number" min="0" max="300" placeholder="0" ${inputClass}></td>`;
-                    }
-                    table += `<td><input type="number" readonly style="background:transparent; border:none; color:var(--text-main);"></td></tr>`;
+                    table += `<td class="active-game-col"><input type="number" min="0" max="300" placeholder="0" class="active-game-input" style="width: 100%;"></td>`;
+                    table += `<td><input type="number" readonly style="background:transparent; border:none; color:var(--text-main); width: 100%;"></td></tr>`;
                 });
                 table += `</table></div>`; return table;
             };
@@ -626,6 +666,7 @@
                 document.getElementById('match-selector').innerHTML = `<option value="">${getTranslation('input_awaiting')}</option>`;
                 document.getElementById('score-matrix-container').innerHTML = '';
                 document.getElementById('generate-next-btn').classList.add('hidden');
+                renderHandicapInputs();
                 alert(getTranslation('alert_purged')); showPage('page-setup');
             }
         }
