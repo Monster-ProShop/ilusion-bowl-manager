@@ -71,12 +71,17 @@
 
         .dropdown-match { margin-bottom: 25px; padding: 20px; background: rgba(0, 0, 0, 0.3); border-left: 4px solid var(--neon-copper); border-radius: 6px; }
         .team-card { background: rgba(0, 0, 0, 0.3); padding: 20px; margin-bottom: 20px; border-radius: 8px; border-left: 4px solid var(--neon-teal); }
+        .match-card { margin-bottom: 30px; padding: 15px; border: 1px solid var(--neon-teal-dim); border-radius: 8px; background: rgba(0,0,0,0.2); }
         
         .score-grid { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(0, 0, 0, 0.2); border-radius: 6px; overflow: hidden; }
         .score-grid th, .score-grid td { padding: 10px; text-align: center; border: 1px solid #334155; }
         .score-grid th { background: rgba(0, 229, 255, 0.1); color: var(--neon-teal); font-size: 12px; text-transform: uppercase; }
         .score-grid input { width: 60px; padding: 8px; text-align: center; }
         .lane-input { background: rgba(226, 135, 67, 0.1) !important; border-color: var(--neon-copper-dim) !important; color: var(--neon-copper) !important; }
+        
+        /* Highlight active game column */
+        .active-game-col { background: rgba(0, 229, 255, 0.05) !important; }
+        .active-game-input { background: rgba(255,255,255,0.1) !important; border-color: var(--neon-teal) !important; }
 
         h3 { color: #fff; border-bottom: 1px solid var(--neon-teal-dim); padding-bottom: 15px; margin-top: 0; font-weight: 300; letter-spacing: 1px; }
 
@@ -140,7 +145,6 @@
         </div>
     </div>
 
-    <!-- NEW: Distinct Team vs Individual Divisions -->
     <div class="form-group">
         <label data-i18n="setup_team_divs">Team Divisions Stratification</label>
         <input type="number" id="qty-team-divs" placeholder="Number of Team Divisions (e.g. 2)" min="1" onchange="renderTeamDivisionInputs()">
@@ -195,10 +199,13 @@
     
     <div class="form-group">
         <label data-i18n="setup_hc">Handicap Algorithm</label>
-        <div style="display: flex; gap: 15px;">
-            <input type="number" id="hc-base" placeholder="Base Avg (e.g. 200)" style="width: 50%;">
-            <input type="number" id="hc-perc" placeholder="Multiplier % (e.g. 80)" style="width: 50%;">
+        <div style="display: flex; gap: 15px; margin-bottom: 10px;">
+            <input type="number" id="hc-base" placeholder="Base Avg (e.g. 200)" style="width: 25%;">
+            <input type="number" id="hc-perc" placeholder="Multiplier % (e.g. 80)" style="width: 25%;">
+            <input type="number" id="hc-min" placeholder="Min HDCP (e.g. 0)" style="width: 25%;">
+            <input type="number" id="hc-max" placeholder="Max HDCP (e.g. 50)" style="width: 25%;">
         </div>
+        <span style="font-size: 11px; color: var(--text-muted);" data-i18n="setup_hc_note">* General min/max rules apply globally if divisions are not separated by handicap constraints.</span>
     </div>
     
     <button onclick="saveParameters()" style="margin-top: 10px; width: 100%; border-color: var(--neon-copper); color: var(--neon-copper);" data-i18n="btn_lock">Lock Parameters</button>
@@ -221,14 +228,14 @@
 <div id="page-admin-matches" class="container hidden">
     <h3 data-i18n="input_title">DATA ENTRY NODE</h3>
     <div class="dropdown-match">
-        <label style="color: var(--neon-copper); display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase;" data-i18n="input_target">Target Matchup Sequence:</label>
+        <label style="color: var(--neon-copper); display: block; margin-bottom: 8px; font-weight: 600; font-size: 13px; text-transform: uppercase;" data-i18n="input_target">Select Target Game:</label>
         <select id="match-selector" onchange="renderScoreMatrix()">
             <option value="" data-i18n="input_awaiting">-- Awaiting Match Generation --</option>
         </select>
     </div>
     
     <div id="score-matrix-container">
-        <p style="color: var(--text-muted);" data-i18n="input_desc">Score entry matrix will render here once a match is selected.</p>
+        <p style="color: var(--text-muted);" data-i18n="input_desc">Score entry matrix will render here once a game is selected.</p>
     </div>
     
     <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -256,11 +263,12 @@
             setup_score: "Scoring Protocol", score_opt_team: "Team Win/Loss Absolute", score_opt_player: "Individual + Team Aggregation",
             setup_cycles: "Total Cycle Count (Games)", setup_finals: "Finals Bracket Architecture", finals_opt_step: "Stepladder Progression",
             finals_opt_round: "Round Robin Matrix", finals_opt_pins: "Total Pins Output (Simultaneous)", finals_opt_baker: "Baker System Alternation",
-            setup_hc: "Handicap Algorithm", btn_lock: "Lock Parameters",
+            setup_hc: "Handicap Algorithm", setup_hc_note: "* General min/max rules apply globally if divisions are not separated by handicap constraints.",
+            btn_lock: "Lock Parameters",
             roster_title: "ROSTER INITIALIZATION", roster_desc: "Deploy input fields based on the quantities established in Parameters.",
             btn_deploy: "Deploy Roster Matrix", btn_test: "🧪 Inject Test Data", btn_commit_roster: "Commit Roster Data & Generate Matches",
-            input_title: "DATA ENTRY NODE", input_target: "Target Matchup Sequence:", input_awaiting: "-- Awaiting Match Generation --",
-            input_desc: "Score entry matrix will render here once a match is selected.", btn_commit_scores: "Commit Match Scores",
+            input_title: "DATA ENTRY NODE", input_target: "Select Target Game:", input_awaiting: "-- Awaiting Match Generation --",
+            input_desc: "Score entry matrix for all teams will render here once a game is selected.", btn_commit_scores: "Commit Match Scores",
             btn_generate_next: "Generate Matches for Next Game",
             alert_telemetry_saved: "Telemetry Saved!", alert_access_denied: "Access Denied.", prompt_admin: "Awaiting System Override (demo: admin):",
             alert_params_locked: "Parameters locked. Proceed to Roster Node.", alert_sys_error: "System Error: Please assign Total Teams and Players per Team in the Parameters tab first.",
@@ -268,7 +276,8 @@
             alert_next_generated: "New matchups generated based on standings and selected lane movement protocol.",
             confirm_purge: "CRITICAL WARNING: Purge all tournament telemetry?", confirm_purge_2: "FINAL OVERRIDE: This action is irreversible. Execute purge?",
             alert_purged: "System purged. Ready for new input.", placeholder_team: "Enter Team Name", placeholder_bowler: "Bowler Name",
-            ph_qty_team_divs: "Number of Team Divisions (e.g. 2)", ph_qty_bowler_divs: "Number of Bowler Divisions (e.g. 4)"
+            ph_qty_team_divs: "Number of Team Divisions (e.g. 2)", ph_qty_bowler_divs: "Number of Bowler Divisions (e.g. 4)",
+            ph_hc_min: "Min HDCP (e.g. 0)", ph_hc_max: "Max HDCP (e.g. 50)", ph_avg: "Avg"
         },
         es: {
             subtitle: "Expertos en Sinergia", btn_login: "Administrador", btn_logout: "Desconectar",
@@ -287,11 +296,12 @@
             setup_score: "Sistema de Puntuación", score_opt_team: "Ganados/Perdidos por Equipo", score_opt_player: "Puntos Individuales + Puntos por Equipo",
             setup_cycles: "Total de Líneas (Juegos)", setup_finals: "Formato de Finales", finals_opt_step: "Escalera (Stepladder)",
             finals_opt_round: "Todos contra Todos (Round Robin)", finals_opt_pins: "Pinos Totales (Simultáneo)", finals_opt_baker: "Formato Baker",
-            setup_hc: "Algoritmo de Hándicap (Ventaja)", btn_lock: "Guardar Parámetros",
+            setup_hc: "Algoritmo de Hándicap (Ventaja)", setup_hc_note: "* Reglas generales de min/max aplican globalmente si las divisiones no están separadas por restricciones de ventaja.",
+            btn_lock: "Guardar Parámetros",
             roster_title: "INICIALIZACIÓN DE EQUIPOS", roster_desc: "Despliega los campos según las cantidades definidas en Parámetros.",
             btn_deploy: "Generar Matriz de Equipos", btn_test: "🧪 Inyectar Datos de Prueba", btn_commit_roster: "Guardar Equipos y Generar Partidas",
-            input_title: "NODO DE CAPTURA DE DATOS", input_target: "Partida Objetivo:", input_awaiting: "-- Esperando Generación de Partidas --",
-            input_desc: "La cuadrícula de resultados aparecerá al seleccionar una partida.", btn_commit_scores: "Guardar Resultados de la Partida",
+            input_title: "NODO DE CAPTURA DE DATOS", input_target: "Seleccionar Juego Objetivo:", input_awaiting: "-- Esperando Generación de Partidas --",
+            input_desc: "La cuadrícula de resultados para todos los equipos aparecerá al seleccionar un juego.", btn_commit_scores: "Guardar Resultados del Juego",
             btn_generate_next: "Generar Partidas para Siguiente Juego",
             alert_telemetry_saved: "¡Datos guardados con éxito!", alert_access_denied: "Acceso Denegado.", prompt_admin: "Ingrese contraseña (demo: admin):",
             alert_params_locked: "Parámetros guardados. Proceda a la pestaña de Equipos.", alert_sys_error: "Error del Sistema: Asigne el total de equipos y jugadores por equipo en Parámetros primero.",
@@ -299,7 +309,8 @@
             alert_next_generated: "Nuevas partidas generadas basadas en posiciones y el protocolo de movimiento seleccionado.",
             confirm_purge: "ADVERTENCIA CRÍTICA: ¿Eliminar todos los datos del torneo?", confirm_purge_2: "CONFIRMACIÓN FINAL: Esta acción es irreversible. ¿Proceder?",
             alert_purged: "Sistema borrado. Listo para nuevos datos.", placeholder_team: "Nombre del Equipo", placeholder_bowler: "Nombre del Jugador",
-            ph_qty_team_divs: "Cantidad Div. de Equipo (ej. 2)", ph_qty_bowler_divs: "Cantidad Div. de Jugadores (ej. 4)"
+            ph_qty_team_divs: "Cantidad Div. de Equipo (ej. 2)", ph_qty_bowler_divs: "Cantidad Div. de Jugadores (ej. 4)",
+            ph_hc_min: "HDCP Min (ej. 0)", ph_hc_max: "HDCP Max (ej. 50)", ph_avg: "Prom."
         }
     };
 
@@ -316,9 +327,12 @@
         
         document.getElementById('qty-team-divs').placeholder = getTranslation('ph_qty_team_divs');
         document.getElementById('qty-bowler-divs').placeholder = getTranslation('ph_qty_bowler_divs');
+        document.getElementById('hc-min').placeholder = getTranslation('ph_hc_min');
+        document.getElementById('hc-max').placeholder = getTranslation('ph_hc_max');
         document.querySelectorAll('input[id^="team-div-name-"], input[id^="bowler-div-name-"]').forEach(el => { el.placeholder = getTranslation('div_name_placeholder'); });
         document.querySelectorAll('input[id^="team-"][id$="-name"]').forEach(el => { el.placeholder = getTranslation('placeholder_team'); });
-        document.querySelectorAll('input[id*="-player-"]').forEach(el => { el.placeholder = getTranslation('placeholder_bowler'); });
+        document.querySelectorAll('input[id*="-player-"][id$="-avg"]').forEach(el => { el.placeholder = getTranslation('ph_avg'); });
+        document.querySelectorAll('input[id*="-player-"]:not([id$="-avg"])').forEach(el => { el.placeholder = getTranslation('placeholder_bowler'); });
         document.documentElement.lang = currentLang;
     }
 
@@ -404,7 +418,11 @@
             laneStart: document.getElementById('lane-start').value, 
             laneEnd: document.getElementById('lane-end').value,
             laneMovement: document.getElementById('lane-movement').value, 
-            totalGames: document.getElementById('total-games').value
+            totalGames: document.getElementById('total-games').value,
+            hcBase: document.getElementById('hc-base').value,
+            hcPerc: document.getElementById('hc-perc').value,
+            hcMin: document.getElementById('hc-min').value,
+            hcMax: document.getElementById('hc-max').value
         };
         saveData(); alert(getTranslation('alert_params_locked'));
     }
@@ -437,7 +455,10 @@
                 html += `<div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px;">
                             <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 5px;">BOWLER 0${p}</label>
                             <input type="text" id="team-${t}-player-${p}" placeholder="${getTranslation('placeholder_bowler')}" style="margin-bottom: 8px;">
-                            <select id="team-${t}-player-${p}-div">${bOptions}</select>
+                            <div style="display:flex; gap:5px;">
+                                <select id="team-${t}-player-${p}-div" style="flex:2;">${bOptions}</select>
+                                <input type="number" id="team-${t}-player-${p}-avg" placeholder="${getTranslation('ph_avg')}" style="flex:1;">
+                            </div>
                          </div>`;
             }
             html += `</div></div>`;
@@ -460,6 +481,7 @@
             
             for(let p = 1; p <= qtyPlayers; p++) {
                 document.getElementById(`team-${t}-player-${p}`).value = playerNames[Math.floor(Math.random() * playerNames.length)] + " " + p;
+                document.getElementById(`team-${t}-player-${p}-avg`).value = Math.floor(Math.random() * (220 - 150 + 1)) + 150;
                 if(bDivs.length > 0) document.getElementById(`team-${t}-player-${p}-div`).value = bDivs[Math.floor(Math.random() * bDivs.length)];
             }
         }
@@ -477,7 +499,8 @@
             for(let p = 1; p <= qtyPlayers; p++) {
                 players.push({
                     name: document.getElementById(`team-${t}-player-${p}`).value || `Bowler ${p}`,
-                    division: document.getElementById(`team-${t}-player-${p}-div`)?.value || ""
+                    division: document.getElementById(`team-${t}-player-${p}-div`)?.value || "",
+                    avg: document.getElementById(`team-${t}-player-${p}-avg`)?.value || ""
                 });
             }
             teams.push({ id: t, name: teamName, division: tDiv, players: players });
@@ -496,8 +519,10 @@
     function populateMatchDropdown() {
         let select = document.getElementById('match-selector');
         select.innerHTML = `<option value="">${getTranslation('input_awaiting')}</option>`;
-        if(tournamentData.matches && tournamentData.matches.length > 0) {
-            tournamentData.matches.forEach(m => { select.innerHTML += `<option value="${m.id}">Round ${m.round || 1} - Match ${m.id}: ${m.teamA.name} vs ${m.teamB.name}</option>`; });
+        
+        let totalGames = parseInt(tournamentData.config?.totalGames) || 3;
+        for(let g=1; g<=totalGames; g++) {
+            select.innerHTML += `<option value="${g}">Game ${g}</option>`;
         }
         toggleGenerateNextButton();
     }
@@ -510,42 +535,62 @@
     }
 
     function renderScoreMatrix() {
-        let matchId = document.getElementById('match-selector').value;
+        let gameId = document.getElementById('match-selector').value;
         let container = document.getElementById('score-matrix-container');
         let btn = document.getElementById('commit-scores-btn');
         
-        if(!matchId) { container.innerHTML = `<p style="color: var(--text-muted);">${getTranslation('input_desc')}</p>`; btn.classList.add('hidden'); return; }
+        if(!gameId) { container.innerHTML = `<p style="color: var(--text-muted);">${getTranslation('input_desc')}</p>`; btn.classList.add('hidden'); return; }
         
-        let match = tournamentData.matches.find(m => m.id == matchId);
         let totalGames = parseInt(tournamentData.config?.totalGames) || 3;
         let laneMovement = tournamentData.config?.laneMovement || 'none';
         
-        let html = `<div style="display: flex; flex-direction: column; gap: 20px;">`;
-        const generateTeamTable = (team, color) => {
-            let tDivText = team.division ? `<span style="font-size: 11px; color: var(--text-muted);">(${team.division})</span>` : "";
-            let table = `<div><h4 style="color: ${color}; margin-bottom: 5px; text-transform: uppercase;">${team.name} ${tDivText}</h4><table class="score-grid"><tr><th>Player / Metric</th>`;
-            for(let g=1; g<=totalGames; g++) table += `<th>Game ${g}</th>`;
-            table += `<th>Total</th></tr>`;
+        let html = '';
+        
+        tournamentData.matches.forEach(match => {
+            html += `<div class="match-card">
+                        <h4 style="color: var(--text-main); text-align: center; margin-top: 0; letter-spacing: 1px;">ROUND ${match.round || 1} - MATCH ${match.id}: ${match.teamA.name} vs ${match.teamB.name}</h4>
+                        <div style="display: flex; flex-direction: column; gap: 20px;">`;
             
-            if(laneMovement !== 'none') {
-                table += `<tr><td style="font-weight:600; text-align:left; color: var(--neon-copper); font-size: 11px;">PISTA / LANE</td>`;
-                for(let g=1; g<=totalGames; g++) table += `<td><input type="text" class="lane-input" placeholder="#" title="Assign lane for Game ${g}"></td>`;
-                table += `<td>-</td></tr>`;
-            } else {
-                table += `<tr><td style="font-weight:600; text-align:left; color: var(--neon-copper); font-size: 11px;">PISTA (STATIC)</td><td colspan="${totalGames}"><input type="text" class="lane-input" placeholder="Pair (e.g. 1-2)" style="width: 90%;"></td><td>-</td></tr>`;
-            }
+            const generateTeamTable = (team, color) => {
+                let tDivText = team.division ? `<span style="font-size: 11px; color: var(--text-muted);">(${team.division})</span>` : "";
+                let table = `<div><h5 style="color: ${color}; margin-bottom: 5px; text-transform: uppercase;">${team.name} ${tDivText}</h5><table class="score-grid"><tr><th>Player / Metric</th>`;
+                
+                for(let g=1; g<=totalGames; g++) {
+                    let bg = (g == gameId) ? 'class="active-game-col"' : '';
+                    table += `<th ${bg}>Game ${g}</th>`;
+                }
+                table += `<th>Total</th></tr>`;
+                
+                if(laneMovement !== 'none') {
+                    table += `<tr><td style="font-weight:600; text-align:left; color: var(--neon-copper); font-size: 11px;">PISTA / LANE</td>`;
+                    for(let g=1; g<=totalGames; g++) {
+                        let bg = (g == gameId) ? 'class="lane-input active-game-col"' : 'class="lane-input"';
+                        table += `<td ${bg}><input type="text" class="lane-input" placeholder="#" title="Assign lane for Game ${g}"></td>`;
+                    }
+                    table += `<td>-</td></tr>`;
+                } else {
+                    table += `<tr><td style="font-weight:600; text-align:left; color: var(--neon-copper); font-size: 11px;">PISTA (STATIC)</td><td colspan="${totalGames}"><input type="text" class="lane-input" placeholder="Pair (e.g. 1-2)" style="width: 90%;"></td><td>-</td></tr>`;
+                }
 
-            team.players.forEach((player) => {
-                let pName = typeof player === 'object' ? player.name : player;
-                let pDiv = typeof player === 'object' && player.division ? `<br><span style="font-size: 10px; color: var(--text-muted);">${player.division}</span>` : "";
-                table += `<tr><td style="font-weight:600; text-align:left;">${pName} ${pDiv}</td>`;
-                for(let g=1; g<=totalGames; g++) table += `<td><input type="number" min="0" max="300" placeholder="0"></td>`;
-                table += `<td><input type="number" readonly style="background:transparent; border:none; color:var(--text-main);"></td></tr>`;
-            });
-            table += `</table></div>`; return table;
-        };
+                team.players.forEach((player) => {
+                    let pName = typeof player === 'object' ? player.name : player;
+                    let pAvg = typeof player === 'object' && player.avg ? ` (Avg: ${player.avg})` : "";
+                    let pDiv = typeof player === 'object' && player.division ? `<br><span style="font-size: 10px; color: var(--text-muted);">${player.division}</span>` : "";
+                    table += `<tr><td style="font-weight:600; text-align:left;">${pName}${pAvg} ${pDiv}</td>`;
+                    
+                    for(let g=1; g<=totalGames; g++) {
+                        let inputClass = (g == gameId) ? 'class="active-game-input"' : '';
+                        let colClass = (g == gameId) ? 'class="active-game-col"' : '';
+                        table += `<td ${colClass}><input type="number" min="0" max="300" placeholder="0" ${inputClass}></td>`;
+                    }
+                    table += `<td><input type="number" readonly style="background:transparent; border:none; color:var(--text-main);"></td></tr>`;
+                });
+                table += `</table></div>`; return table;
+            };
 
-        html += generateTeamTable(match.teamA, 'var(--neon-teal)') + generateTeamTable(match.teamB, 'var(--neon-copper)') + `</div>`;
+            html += generateTeamTable(match.teamA, 'var(--neon-teal)') + generateTeamTable(match.teamB, 'var(--neon-copper)') + `</div></div>`;
+        });
+
         container.innerHTML = html; btn.classList.remove('hidden');
     }
 
