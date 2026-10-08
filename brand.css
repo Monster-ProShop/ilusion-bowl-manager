@@ -72,6 +72,10 @@ input,select { max-width:100%; min-width:0; border:1px solid #49453a; border-rad
 .action-row label { flex:1; min-width:180px; }
 .primary { background:var(--gold-gradient); color:#17130a; border-color:#ebc96b; }
 .hint,#account-name { color:var(--text-muted); font-size:12px; }
+.account-controls { display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap; justify-content:flex-end; }
+.account-controls label { min-width:145px; }
+.admin-users { margin-top:24px; padding-top:24px; border-top:1px solid #494133; }
+.admin-user-row { display:grid; grid-template-columns:minmax(180px,1fr) 150px auto; gap:12px; align-items:end; padding:14px 0; border-bottom:1px solid #353126; }
 #cloud-notice:not(:empty) { margin-top:20px; padding:14px 18px; border:1px solid var(--gold-dim); border-radius:10px; background:var(--gold-soft); color:var(--gold-light); font-size:14px; }
 .field-grid,.score-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
 .competition-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin:24px 0; }
@@ -84,5 +88,5 @@ summary { cursor:pointer; color:var(--gold-light); margin-bottom:16px; }
 .table-scroll { overflow-x:auto; }
 button:disabled { opacity:.45; cursor:not-allowed; }
 input:disabled { color:var(--gold); border-color:var(--gold-dim); }
-@media(max-width:720px){.account-panel,.field-grid { grid-template-columns:1fr; }.score-fields { grid-template-columns:1fr; }.account-panel { gap:20px; }.cloud-form button { width:100%; }}
+@media(max-width:720px){.account-panel,.field-grid { grid-template-columns:1fr; }.score-fields { grid-template-columns:1fr; }.account-panel { gap:20px; }.cloud-form button { width:100%; }.account-controls{width:100%;justify-content:flex-start}.admin-user-row{grid-template-columns:1fr}.admin-user-row button{width:100%}}
 
