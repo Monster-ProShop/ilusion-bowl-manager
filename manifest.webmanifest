@@ -1,0 +1,11 @@
+{
+  "name": "Tournaments by ProDrillOS",
+  "short_name": "Tournaments",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101010",
+  "theme_color": "#101010",
+  "icons": [{"src":"assets/prodrillos-app-icon.png","sizes":"512x512","type":"image/png","purpose":"any"}]
+}
+

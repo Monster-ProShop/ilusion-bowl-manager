@@ -1,0 +1,88 @@
+/* Tournaments by ProDrillOS: polished gold, warm ivory and black. */
+:root { color-scheme: dark; --gold-gradient: linear-gradient(115deg, #9c681e 0%, #e8ba4f 22%, #fff0b4 40%, #dca637 56%, #f7dc85 76%, #b37c23 100%); }
+* { box-sizing: border-box; }
+body { line-height: 1.5; background-attachment: fixed; }
+header { padding: 18px max(24px, calc((100vw - 1120px) / 2)); gap: 24px; }
+.header-brand { text-decoration: none; color: var(--text-main); gap: 14px; flex-shrink: 0; }
+.header-brand img.logo { width: 92px; height: 64px; object-fit: contain; box-shadow: none; border-radius: 0; }
+.brand-wordmark { display: flex; flex-direction: column; }
+.brand-title { font-size: 25px; font-weight: 800; letter-spacing: -1px; line-height: 1.15; }
+.brand-signature { font-size: 15px; margin-top: 5px; line-height: 1.2; color: var(--text-main); }
+.gold-type { color: var(--gold-light); background: var(--gold-gradient); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+button { min-height: 44px; letter-spacing: 0; text-transform: none; border-radius: 9px; transition: background .18s, border-color .18s, box-shadow .18s; }
+button:hover { box-shadow: none; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 4px; }
+#auth-section { flex-wrap: wrap; justify-content: flex-end; }
+#btn-lang { color: var(--text-main); border-color: #49453a; padding: 9px 14px; }
+#btn-login { background: var(--gold-gradient); color: #17130a; border: 1px solid #ebc96b; box-shadow: inset 0 1px 0 #fff2bc66; }
+#btn-login:hover { background: linear-gradient(115deg, #e8ba4f, #fff0b4, #dca637); color: #17130a; }
+main { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.tournament-intro { display: flex; justify-content: space-between; align-items: center; gap: 32px; padding: 45px 0 34px; border-bottom: 1px solid var(--gold-dim); }
+.eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; color: var(--gold); margin: 0 0 12px; }
+h1 { font-size: clamp(28px, 3.3vw, 42px); letter-spacing: -1.6px; line-height: 1.2; margin: 0 0 14px; font-weight: 800; }
+.intro-copy { color: var(--text-muted); font-size: 15px; max-width: 490px; margin: 0; }
+.intro-mark { object-fit: contain; width: 225px; height: 145px; filter: drop-shadow(0 8px 20px #0008); }
+.container { max-width: none; margin: 24px 0; padding: 28px; border-radius: 16px; background: linear-gradient(145deg, #20201e, #171716); border-color: #38342b; box-shadow: 0 12px 40px #0002; }
+.nav-buttons.container { padding: 0; background: none; border: none; box-shadow: none; gap: 10px; }
+.nav-buttons button { color: var(--text-muted); border-color: #3d3930; background: #191918; }
+.nav-buttons button:hover { color: var(--text-main); border-color: var(--gold); }
+.nav-buttons button[aria-current="page"] { color: #17130a; background: var(--gold-gradient); border-color: #ebc96b; }
+.nav-buttons .danger-btn { color: var(--danger); border-color: #81363e; }
+h3 { color: var(--text-main); font-size: 21px; font-weight: 600; letter-spacing: -.5px; border-color: #3c372c; }
+.container > p { font-size: 14px; }
+.standings-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 155px; margin-top: 26px; border: 1px dashed #494133; border-radius: 12px; padding: 24px; text-align: center; color: var(--text-muted); font-size: 13px; }
+.placeholder-symbol { color: var(--gold); width: 42px; height: 42px; line-height: 38px; border-radius: 50%; border: 1px solid var(--gold-dim); background: var(--gold-soft); font-size: 24px; }
+.form-group input, .form-group select, .dropdown-match select { min-width: 0; min-height: 46px; font-size: 16px; }
+.form-group label { text-transform: none; letter-spacing: .2px; }
+.team-card, .match-card { overflow-x: auto; }
+.score-grid input { border: 1px solid #49453a; border-radius: 5px; background: #101010; color: var(--text-main); font: inherit; }
+.score-grid { min-width: 540px; }
+#score-matrix-container { overflow-x: auto; }
+.site-footer { max-width: 1120px; margin: 36px auto 0; padding: 22px 24px 30px; display: flex; justify-content: space-between; align-items: baseline; gap: 20px; color: var(--text-muted); font-size: 11px; }
+.site-footer > span:first-child { font-size: 13px; color: var(--text-main); font-weight: 600; flex-shrink: 0; }
+.footer-by { font-weight: 400; }
+@media (max-width: 720px) {
+    header { position: static; flex-wrap: wrap; padding: 18px 20px; gap: 18px; }
+    .header-brand img.logo { width: 75px; height: 52px; }
+    .brand-title { font-size: 24px; }
+    #auth-section { justify-content: flex-start; width: 100%; gap: 10px; }
+    #btn-login { flex: 1; }
+    main { padding: 0 18px; }
+    .tournament-intro { padding: 28px 0; gap: 16px; }
+    .intro-mark { width: 95px; height: 95px; }
+    h1 { font-size: 29px; letter-spacing: -1px; }
+    .intro-copy { font-size: 13px; }
+    .container { padding: 20px; }
+    .nav-buttons button { padding: 10px 14px; }
+    #admin-nav { gap: 10px !important; }
+    .site-footer { flex-direction: column; gap: 8px; padding: 0 18px 24px; }
+    #handicap-rules-container input { width: 40%; flex: 1 1 40% !important; }
+    #handicap-rules-container div[style*="display: flex"] { flex-wrap: wrap; }
+}
+@media (max-width: 400px) { .intro-mark { display: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
+.account-panel { display:grid; grid-template-columns: 1fr 1fr; gap:32px; }
+.account-panel h2,.panel-heading h2 { margin:0 0 12px; font-size:25px; letter-spacing:-.7px; }
+.account-panel p { color:var(--text-muted); font-size:14px; }
+.cloud-form { display:flex; flex-direction:column; gap:16px; }
+label { display:flex; flex-direction:column; gap:7px; font-size:13px; color:var(--text-muted); }
+input,select { max-width:100%; min-width:0; border:1px solid #49453a; border-radius:8px; background:#101010; padding:12px; color:var(--text-main); font:inherit; font-size:16px; }
+.action-row,.panel-heading { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+.action-row { justify-content:flex-start; margin:18px 0; }
+.action-row label { flex:1; min-width:180px; }
+.primary { background:var(--gold-gradient); color:#17130a; border-color:#ebc96b; }
+.hint,#account-name { color:var(--text-muted); font-size:12px; }
+#cloud-notice:not(:empty) { margin-top:20px; padding:14px 18px; border:1px solid var(--gold-dim); border-radius:10px; background:var(--gold-soft); color:var(--gold-light); font-size:14px; }
+.field-grid,.score-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.competition-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin:24px 0; }
+.competition-card { border:1px solid #494133; border-radius:12px; padding:20px; }
+.competition-card h3 { margin:8px 0; border:0; padding:0; }
+.competition-card p { font-size:13px; color:var(--text-muted); }
+details { border-top:1px solid #494133; padding:18px 0; margin-top:18px; }
+summary { cursor:pointer; color:var(--gold-light); margin-bottom:16px; }
+.text-link { color:var(--gold-light); font-size:13px; text-underline-offset:4px; }
+.table-scroll { overflow-x:auto; }
+button:disabled { opacity:.45; cursor:not-allowed; }
+input:disabled { color:var(--gold); border-color:var(--gold-dim); }
+@media(max-width:720px){.account-panel,.field-grid { grid-template-columns:1fr; }.score-fields { grid-template-columns:1fr; }.account-panel { gap:20px; }.cloud-form button { width:100%; }}
+
