@@ -4,11 +4,12 @@ const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cfg=window.PRODRILLOS;
 const client=createClient(cfg.url,{auth:{persistSession:true,autoRefreshToken:true,fetchOptions:{credentials:'include',cache:'no-store'}}});
-let user=null,role='user',competition=null,session=null,roster=[],competitionRows=[],dirty=false,saving=false;
+let user=null,role='user',accountMode='user',competition=null,session=null,roster=[],competitionRows=[],accessUsers=[],dirty=false,saving=false;
 const notice=message=>{$('cloud-notice').textContent=message;};
 const fail=error=>{notice(error.message||String(error));};
 const run=fn=>async event=>{event?.preventDefault();try{await fn(event);}catch(error){fail(error);}};
-const manager=()=>!!competition?.can_manage;
+const hasAdminRole=()=>['manager','superadmin'].includes(role);
+const manager=()=>accountMode==='admin'&&!!competition?.can_manage;
 function updateAuth(){ $('btn-login').textContent=user?'My competitions':'Sign in';$('btn-logout').classList.toggle('hidden',!user); }
 async function api(path,method='GET',body){
   const token=await client.auth.token();
@@ -23,9 +24,9 @@ async function loadAccount(){
   const auth=await client.auth.getSession();user=auth.data?.user||null;updateAuth();
   if(!user){$('account-panel').classList.remove('hidden');return;}
   if(!user.emailVerified){$('verify-form').classList.remove('hidden');throw Error('Verify your email before opening your competitions.');}
-  const account=await api('/me');role=account.role;
+  const account=await api('/me');role=account.role;accountMode=hasAdminRole()?'admin':'user';
   $('account-panel').classList.add('hidden');$('account-name').textContent=user.email;
-  $('create-competition-details').classList.toggle('hidden',!['manager','superadmin'].includes(role));
+  $('account-mode-wrap').classList.toggle('hidden',!hasAdminRole());$('account-mode').value=accountMode;
   await dashboard();
 }
 async function dashboard(){
@@ -33,8 +34,19 @@ async function dashboard(){
   dirty=false;competition=null;session=null;
   $('competition-panel').classList.remove('hidden');$('session-panel').classList.add('hidden');$('tournament-workspace').classList.add('hidden');
   competitionRows=await api('/competitions');renderCompetitions(competitionRows);
+  $('create-competition-details').classList.toggle('hidden',!(hasAdminRole()&&accountMode==='admin'));
+  $('superadmin-users').classList.toggle('hidden',!(role==='superadmin'&&accountMode==='admin'));
+  if(role==='superadmin'&&accountMode==='admin')await loadUsers();
   const requested=new URLSearchParams(location.search).get('competition');
   if(requested){const row=competitionRows.find(c=>c.id===requested);if(row)await openCompetition(row);}
+}
+async function loadUsers(){accessUsers=await api('/users');renderUsers('');}
+function renderUsers(filter){
+  const query=filter.trim().toLowerCase(),rows=accessUsers.filter(a=>!query||a.email.includes(query)).slice(0,30);
+  $('admin-user-results').innerHTML=rows.map(a=>{
+    const owner=a.role==='superadmin';
+    return `<div class="admin-user-row" data-access-user="${esc(a.id)}"><strong>${esc(a.email)}</strong><label>Account type<select data-access-role ${owner?'disabled':''}><option value="user" ${a.role==='user'?'selected':''}>User</option><option value="manager" ${a.role==='manager'?'selected':''}>Admin</option>${owner?'<option value="superadmin" selected>SuperAdmin</option>':''}</select></label>${owner?'<span class="hint">Protected owner</span>':'<button data-save-role>Save</button>'}</div>`;
+  }).join('')||'<p class="hint">No registered users match this email.</p>';
 }
 function renderCompetitions(rows){
   $('competition-list').innerHTML=rows.map(c=>`<article class="competition-card"><span class="eyebrow">${esc(c.kind)}</span><h3>${esc(c.name)}</h3><p>${[c.bowling_center,c.city,c.region,c.country].filter(Boolean).map(esc).join(' · ')}</p><button data-open-competition="${esc(c.id)}">Open competition</button></article>`).join('')||'<p class="hint">No competitions yet. Search by name or location to join one.</p>';
@@ -137,6 +149,9 @@ $('register-account').onclick=run(async()=>{if(!$('signin-form').reportValidity(
 $('verify-form').onsubmit=run(async()=>{const {error}=await client.auth.emailOtp.verifyEmail({email:$('account-email').value.trim().toLowerCase(),otp:$('verification-code').value.trim()});if(error)throw error;$('verify-form').classList.add('hidden');notice('Email verified. Sign in to continue.');});
 $('resend-code').onclick=run(async()=>{const {error}=await client.auth.sendVerificationEmail({email:$('account-email').value.trim().toLowerCase(),callbackURL:location.origin+location.pathname});if(error)throw error;notice('Verification code sent.');});
 $('back-competitions').onclick=run(dashboard);
+$('account-mode').onchange=run(async event=>{if(!canLeave()){event.target.value=accountMode;return;}accountMode=event.target.value;competition=null;session=null;dirty=false;await dashboard();notice(accountMode==='admin'?'Admin tools are active.':'Bowler mode is active. You can join leagues and link your bowler profile.');});
+$('admin-user-search').oninput=event=>renderUsers(event.target.value);
+$('admin-user-results').onclick=run(async event=>{const button=event.target.closest('[data-save-role]');if(!button)return;const row=button.closest('[data-access-user]'),selected=row.querySelector('[data-access-role]').value;await api('/users/role','POST',{userId:row.dataset.accessUser,role:selected});await loadUsers();notice('User account type saved.');});
 $('search-competitions').onclick=run(async()=>renderCompetitions(await api('/directory?q='+encodeURIComponent($('competition-search').value))));
 $('create-competition').onsubmit=run(async event=>{const body=Object.fromEntries(new FormData(event.target));body.format='traditional';const result=await api('/competitions','POST',body);competitionRows=await api('/competitions');await openCompetition(competitionRows.find(c=>c.id===result.id));event.target.reset();});
 $('create-session').onsubmit=run(async event=>{const result=await api('/league/sessions','POST',{competitionId:competition.id,...Object.fromEntries(new FormData(event.target))});await listSessions(result.id);await openSession(result.id);event.target.reset();});
