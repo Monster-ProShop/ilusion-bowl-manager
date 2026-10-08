@@ -11,10 +11,20 @@ const run=fn=>async event=>{event?.preventDefault();try{await fn(event);}catch(e
 const hasAdminRole=()=>['manager','superadmin'].includes(role);
 const manager=()=>accountMode==='admin'&&!!competition?.can_manage;
 function updateAuth(){ $('btn-login').textContent=user?'My competitions':'Sign in';$('btn-logout').classList.toggle('hidden',!user); }
+async function activeToken(attempts=5){
+  let lastError;
+  for(let attempt=0;attempt<attempts;attempt++){
+    const result=await client.auth.token();
+    if(!result.error&&result.data?.token)return result.data.token;
+    lastError=result.error||lastError;
+    await client.auth.getSession();
+    if(attempt<attempts-1)await new Promise(resolve=>setTimeout(resolve,150*(attempt+1)));
+  }
+  throw lastError||Error('Please sign in again. Your current edits have not been saved.');
+}
 async function api(path,method='GET',body){
-  const token=await client.auth.token();
-  if(token.error||!token.data?.token)throw Error('Please sign in again. Your current edits have not been saved.');
-  const response=await fetch(cfg.apiUrl+path,{method,headers:{'content-type':'application/json',authorization:'Bearer '+token.data.token},...(body?{body:JSON.stringify(body)}:{})});
+  const token=await activeToken();
+  const response=await fetch(cfg.apiUrl+path,{method,headers:{'content-type':'application/json',authorization:'Bearer '+token},...(body?{body:JSON.stringify(body)}:{})});
   const data=await response.json();if(!response.ok)throw Error(data.error||'Could not complete the request');return data;
 }
 const query=()=>'?competition_id='+encodeURIComponent(competition.id);
