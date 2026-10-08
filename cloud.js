@@ -1,9 +1,9 @@
-import { createClient } from 'https://esm.sh/@neondatabase/neon-js@0.7.0-beta?bundle';
+import { createAuthClient } from 'https://esm.sh/@neondatabase/auth@0.5.0-beta?bundle';
 
 const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cfg=window.PRODRILLOS;
-const client=createClient(cfg.url,{auth:{persistSession:true,autoRefreshToken:true,fetchOptions:{credentials:'include',cache:'no-store'}}});
+const client={auth:createAuthClient(cfg.authUrl)};
 let user=null,role='user',accountMode='user',competition=null,session=null,roster=[],competitionRows=[],accessUsers=[],dirty=false,saving=false;
 const notice=message=>{$('cloud-notice').textContent=message;};
 const fail=error=>{notice(error.message||String(error));};
