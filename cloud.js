@@ -6,7 +6,7 @@ const cfg=window.PRODRILLOS;
 const client={auth:createAuthClient(cfg.authUrl)};
 const authKey='prodrillos-auth-session';
 const savedAuth=()=>{try{return JSON.parse(sessionStorage.getItem(authKey)||'null');}catch{return null;}};
-let sessionToken=savedAuth()?.token||null,user=null,role='user',accountMode='user',competition=null,session=null,roster=[],competitionRows=[],accessUsers=[],dirty=false,saving=false;
+let sessionToken=savedAuth()?.token||null,user=null,role='user',accountMode='user',competition=null,session=null,roster=[],competitionRows=[],accessUsers=[],sessionRows=[],leagueConfiguration=null,dirty=false,saving=false;
 const notice=message=>{$('cloud-notice').textContent=message;};
 const fail=error=>{notice(error.message||String(error));};
 const run=fn=>async event=>{event?.preventDefault();try{await fn(event);}catch(error){fail(error);}};
@@ -86,19 +86,38 @@ async function openCompetition(row){
   $('competition-panel').classList.add('hidden');$('session-panel').classList.remove('hidden');$('tournament-workspace').classList.add('hidden');
   $('competition-name').textContent=row.name;$('competition-location').textContent=[row.bowling_center,row.city,row.region,row.country].filter(Boolean).join(' · ');
   $('session-manager').classList.toggle('hidden',!manager());
-  await loadRoster();await listSessions();await loadSummary();
+  await loadRoster();await loadConfiguration();await listSessions();await loadSummary();
   const requested=new URLSearchParams(location.search).get('session');
   if(requested&&[...$('session-select').options].some(o=>o.value===requested))await openSession(requested);
 }
 async function listSessions(selected){
-  const rows=await api('/league/sessions'+query());
-  $('session-select').innerHTML='<option value="">Choose a session</option>'+rows.map(s=>`<option value="${esc(s.id)}">${esc(String(s.session_date).slice(0,10))} · ${esc(s.label)}</option>`).join('');
+  sessionRows=await api('/league/sessions'+query());
+  $('session-select').innerHTML='<option value="">Choose a session</option>'+sessionRows.map(s=>`<option value="${esc(s.id)}">${esc(String(s.session_date).slice(0,10))} · ${esc(s.label)}</option>`).join('');
+  renderCalendar();renderLeagueStats();
   if(selected)$('session-select').value=selected;
 }
 async function loadSummary(){
   const rows=await api('/league/summary'+query());
-  $('season-summary').innerHTML=rows.length?'<h3>League averages · all sessions</h3>'+table(['Bowler','Games','Pinfall','Average','High game'],rows.map(r=>[r.name,r.games,r.pinfall,r.average,r.high_game])):'';
+  const content=rows.length?table(['Bowler','Games','Pinfall','Average','HCP','High game','High HCP game','High HCP series'],rows.map(r=>[r.name,r.games,r.pinfall,r.average,r.handicap,r.high_game,r.high_game_handicap,r.high_series_handicap])):'<div class="standings-placeholder">Bowler standings will appear after scores are entered.</div>';
+  $('season-summary').innerHTML=rows.length?'<h3>League averages · all sessions</h3>'+content:'';$('bowler-standings').innerHTML=content;
+  $('honor-scores').innerHTML=rows.length?table(['Bowler','High scratch game','High scratch series','High HCP game','High HCP series'],rows.slice().sort((a,b)=>b.high_game-a.high_game).map(r=>[r.name,r.high_game,r.high_series,r.high_game_handicap,r.high_series_handicap])):'<div class="standings-placeholder">Honor scores will appear after scores are entered.</div>';
 }
+function splitNames(value){return String(value||'').split(',').map(v=>v.trim()).filter(Boolean);}
+function bonuses(value){return String(value||'').split(/\n/).map(line=>{const [concept,points]=line.split('|');return {concept:concept?.trim(),points:Number(points||0)};}).filter(b=>b.concept);}
+function leagueFormConfig(){const f=new FormData($('league-configuration')),n=name=>Number(f.get(name));return {
+ numberOfTeams:n('numberOfTeams'),activeBowlers:n('activeBowlers'),substituteBowlers:n('substituteBowlers'),numberOfSessions:n('numberOfSessions'),gamesPerBowler:n('gamesPerBowler'),startDate:f.get('startDate'),startLane:n('startLane'),positionRounds:splitNames(f.get('positionRounds')).map(Number),teamDivisions:splitNames(f.get('teamDivisions')),bowlerDivisions:splitNames(f.get('bowlerDivisions')),
+ points:{gameWin:n('gameWin'),gameTie:n('gameTie'),seriesWin:n('seriesWin'),seriesTie:n('seriesTie'),bonuses:bonuses(f.get('bonuses'))},handicap:{global:{percent:n('handicapPercent'),base:n('handicapBase'),minAverage:n('minimumAverage'),maxAverage:n('maximumAverage')},divisions:{}},finances:{costPerGame:n('costPerGame'),prizeFundPerSession:n('prizeFundPerSession')},
+ sponsorships:[...document.querySelectorAll('[data-sponsor-profile]')].map(input=>({profileId:input.dataset.sponsorProfile,amountPerSession:Number(input.value||0)})).filter(s=>s.amountPerSession>0)};}
+function fillLeagueForm(config){const form=$('league-configuration'),set=(name,value)=>{if(form.elements[name])form.elements[name].value=value??'';};
+ const defaults=config||{numberOfTeams:8,activeBowlers:4,substituteBowlers:2,numberOfSessions:36,gamesPerBowler:3,startLane:1,startDate:new Date().toISOString().slice(0,10),positionRounds:[12,24,36],points:{gameWin:1,gameTie:.5,seriesWin:1,seriesTie:.5,bonuses:[]},handicap:{global:{percent:90,base:220,minAverage:0,maxAverage:300}},finances:{costPerGame:0,prizeFundPerSession:0}};
+ for(const key of ['numberOfTeams','activeBowlers','substituteBowlers','numberOfSessions','gamesPerBowler','startDate','startLane'])set(key,defaults[key]);set('positionRounds',(defaults.positionRounds||[]).join(', '));set('teamDivisions',(defaults.teamDivisions||[]).join(', '));set('bowlerDivisions',(defaults.bowlerDivisions||[]).join(', '));
+ for(const key of ['gameWin','gameTie','seriesWin','seriesTie'])set(key,defaults.points?.[key]);set('bonuses',(defaults.points?.bonuses||[]).map(b=>`${b.concept} | ${b.points}`).join('\n'));set('handicapPercent',defaults.handicap?.global?.percent);set('handicapBase',defaults.handicap?.global?.base);set('minimumAverage',defaults.handicap?.global?.minAverage);set('maximumAverage',defaults.handicap?.global?.maxAverage);set('costPerGame',defaults.finances?.costPerGame);set('prizeFundPerSession',defaults.finances?.prizeFundPerSession);
+ const amounts=new Map((defaults.sponsorships||[]).map(s=>[s.profileId,s.amountPerSession]));$('sponsorship-list').innerHTML=roster.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(p=>`<label class="sponsor-row"><span>${esc(p.name)}</span><span>Amount per session<input data-sponsor-profile="${esc(p.id)}" type="number" min="0" step="0.01" value="${esc(amounts.get(p.id)||0)}"></span></label>`).join('')||'<p class="hint">Add bowlers to the shared roster to configure sponsorships.</p>';
+}
+async function loadConfiguration(){const data=await api('/league/configuration'+query());leagueConfiguration=data.configuration;fillLeagueForm(leagueConfiguration);$('league-setup-tab').classList.toggle('hidden',!manager());}
+function renderCalendar(){$('league-calendar-list').innerHTML=sessionRows.length?sessionRows.map(s=>`<article class="calendar-card ${s.position_round?'position':''}"><div><strong>${esc(String(s.session_date).slice(0,10))}</strong><span class="hint">Week ${esc(s.week_number||'—')}</span></div><div><strong>${esc(s.label)}</strong><p class="hint">${s.position_round?'Matchups follow the current standings.':'USBC rotation and assigned lane pair.'}</p><button data-calendar-session="${esc(s.id)}">Open session</button></div></article>`).join(''):'<div class="standings-placeholder">Configure the league and generate its sessions to build the calendar.</div>';
+ document.querySelectorAll('[data-calendar-session]').forEach(b=>b.onclick=run(()=>openSession(b.dataset.calendarSession)));}
+function renderLeagueStats(){$('league-stat-grid').innerHTML=[['Teams',leagueConfiguration?.numberOfTeams||'—'],['Sessions',sessionRows.length||leagueConfiguration?.numberOfSessions||'—'],['Games / bowler',leagueConfiguration?.gamesPerBowler||'—'],['Position rounds',leagueConfiguration?.positionRounds?.length||0]].map(([label,value])=>`<div class="stat-card"><span class="hint">${label}</span><strong>${value}</strong></div>`).join('');}
 function table(head,rows){return '<div class="table-scroll"><table class="score-grid"><thead><tr>'+head.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';}
 async function openSession(id){
   if(!canLeave()){$('session-select').value=session?.id||'';return;}
@@ -107,7 +126,6 @@ async function openSession(id){
   window.TournamentManager.setState(session.state,manager());
   const url=new URL(location.href);url.searchParams.set('competition',competition.id);url.searchParams.set('session',id);history.replaceState(null,'',url);
   $('session-status').textContent=`${session.label} · ${String(session.session_date).slice(0,10)} · ${session.brackets_linked?'Linked bracket scores sync automatically.':'Cloud session'} · Saved revision ${session.revision}`;
-  $('link-brackets').disabled=session.brackets_linked;$('unlink-brackets').disabled=!session.brackets_linked;
   renderStandings();notice('Session loaded from the cloud.');
 }
 function renderStandings(){
@@ -115,8 +133,10 @@ function renderStandings(){
   for(const game of session.games){const t=totals.get(game.profile_id)||{games:0,total:0,high:0};t.games++;t.total+=game.scratch;t.high=Math.max(t.high,game.scratch);totals.set(game.profile_id,t);}
   const rows=session.state.teams.flatMap(t=>t.players.map(p=>{const s=totals.get(p.profileId)||{games:0,total:0,high:0};return {name:p.name,team:t.name,...s};})).sort((a,b)=>b.total-a.total||a.name.localeCompare(b.name));
   $('results-display').innerHTML=rows.length?table(['Bowler','Team','Games','Scratch pins','Average','High game'],rows.map(r=>[r.name,r.team,r.games,r.total,r.games?(r.total/r.games).toFixed(2):'—',r.games?r.high:'—'])):'<div class="standings-placeholder">Set up the session and select bowlers from the shared roster to begin.</div>';
+  const teamRows=session.state.teams.map(team=>{const values=team.players.map(p=>totals.get(p.profileId)).filter(Boolean),pins=values.reduce((sum,v)=>sum+v.total,0),games=values.reduce((sum,v)=>sum+v.games,0);return [team.name,games,pins,games?(pins/games).toFixed(2):'—'];}).sort((a,b)=>b[2]-a[2]);
+  $('team-standings').innerHTML=teamRows.length?table(['Team','Bowler games','Scratch pins','Average'],teamRows):'<div class="standings-placeholder">Team standings will appear after the league roster and scores are entered.</div>';
   let matches=$('match-results');if(!matches){matches=document.createElement('div');matches.id='match-results';$('page-matches').append(matches);}
-  matches.innerHTML=table(['Match','Team A','Team B'],session.state.matches.map(m=>[m.id,m.teamA.name,m.teamB.name]));
+  matches.innerHTML=table(['Match','Team A','Team B','Lanes'],session.state.matches.map((m,i)=>[m.id||i+1,m.teamA?.name||m.teamA||`Position ${m.positionA}`,m.teamB?.name||m.teamB||`Position ${m.positionB}`,m.laneStart?`${m.laneStart}-${m.laneEnd}`:'—']));
 }
 function renderScores(){
   const game=Number($('match-selector').value);if(!game||!session){$('score-matrix-container').innerHTML='';$('commit-scores-btn').classList.add('hidden');return;}
@@ -178,12 +198,10 @@ $('add-profile').onsubmit=run(async event=>{await api('/league/roster','POST',{c
 $('claim-bowler').onclick=run(async()=>{const profile=roster.find(p=>p.id===$('claim-profile').value);if(!profile)throw Error('Choose your bowler name.');if(!confirm('Confirm that you are '+profile.name+'.'))return;await api('/league/claim','POST',{competitionId:competition.id,profileId:profile.id,confirm:true});await loadRoster();notice('Your verified account is linked to this bowler.');});
 $('session-select').onchange=run(async event=>{if(event.target.value)await openSession(event.target.value);else $('tournament-workspace').classList.add('hidden');});
 $('refresh-session').onclick=run(async()=>{if(session)await openSession(session.id);await loadSummary();});
-$('link-brackets').onclick=run(async()=>{
- if(!session||!canLeave())return;const date=String(session.session_date).slice(0,10);
- if(!confirm(`Link the CURRENT Brackets roster and games 1–3 to ${session.label} (${date}) at ${competition.bowling_center}? Confirm this is the same bowling session.`))return;
- const result=await api('/league/link-brackets','POST',sessionBody({confirm:true,date}));dirty=false;await openSession(session.id);notice(result.unmapped?.length?`Linked. Not matched to this session roster: ${result.unmapped.join(', ')}`:'Brackets linked. Scores sync when saved in Brackets.');
-});
-$('unlink-brackets').onclick=run(async()=>{if(!session||!confirm('Stop syncing Brackets into this session? Saved scores will be retained.'))return;await api('/league/unlink-brackets','POST',sessionBody({}));dirty=false;await openSession(session.id);});
+$('league-configuration').onsubmit=run(async()=>{leagueConfiguration=leagueFormConfig();const saved=await api('/league/configuration','POST',{competitionId:competition.id,configuration:leagueConfiguration});leagueConfiguration=saved.configuration;fillLeagueForm(leagueConfiguration);renderLeagueStats();dirty=false;notice('League configuration saved securely online.');});
+$('generate-league-schedule').onclick=run(async()=>{if(!leagueConfiguration)throw Error('Save the league configuration first.');if(!confirm('Generate the complete league calendar and replace unscored sessions?'))return;const result=await api('/league/generate-schedule','POST',{competitionId:competition.id});await listSessions();showLeagueView('league-calendar');notice(`${result.generated} league sessions generated.`);});
+function showLeagueView(id){document.querySelectorAll('.league-view').forEach(v=>v.classList.toggle('hidden',v.id!==id));document.querySelectorAll('[data-league-view]').forEach(b=>b.classList.toggle('active',b.dataset.leagueView===id));}
+document.querySelectorAll('[data-league-view]').forEach(button=>button.onclick=()=>showLeagueView(button.dataset.leagueView));
 $('tournament-workspace').addEventListener('input',()=>{dirty=true;});
 window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
 // Refresh linked scores only when there are no local edits; never overwrite a form in use.
