@@ -4,7 +4,9 @@ const $=id=>document.getElementById(id);
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cfg=window.PRODRILLOS;
 const client={auth:createAuthClient(cfg.authUrl)};
-let user=null,role='user',accountMode='user',competition=null,session=null,roster=[],competitionRows=[],accessUsers=[],dirty=false,saving=false;
+const authKey='prodrillos-auth-session';
+const savedAuth=()=>{try{return JSON.parse(sessionStorage.getItem(authKey)||'null');}catch{return null;}};
+let sessionToken=savedAuth()?.token||null,user=null,role='user',accountMode='user',competition=null,session=null,roster=[],competitionRows=[],accessUsers=[],dirty=false,saving=false;
 const notice=message=>{$('cloud-notice').textContent=message;};
 const fail=error=>{notice(error.message||String(error));};
 const run=fn=>async event=>{event?.preventDefault();try{await fn(event);}catch(error){fail(error);}};
@@ -15,7 +17,7 @@ async function activeToken(attempts=5){
   let lastError;
   for(let attempt=0;attempt<attempts;attempt++){
     try{
-      const response=await fetch(cfg.authUrl+'/token',{credentials:'include',cache:'no-store'});
+      const response=await fetch(cfg.authUrl+'/token',{credentials:'include',cache:'no-store',headers:sessionToken?{authorization:'Bearer '+sessionToken}:{}});
       const data=await response.json();
       if(response.ok&&data?.token)return data.token;
     }catch(error){lastError=error;}
@@ -25,6 +27,7 @@ async function activeToken(attempts=5){
     await client.auth.getSession();
     if(attempt<attempts-1)await new Promise(resolve=>setTimeout(resolve,150*(attempt+1)));
   }
+  if(sessionToken)return sessionToken;
   throw lastError||Error('Please sign in again. Your current edits have not been saved.');
 }
 async function api(path,method='GET',body){
@@ -36,7 +39,7 @@ const query=()=>'?competition_id='+encodeURIComponent(competition.id);
 const sessionBody=extra=>({competitionId:competition.id,sessionId:session.id,revision:session.revision,...extra});
 function canLeave(){return !dirty||confirm('There are unsaved edits. Discard them and continue?');}
 async function loadAccount(){
-  const auth=await client.auth.getSession();user=auth.data?.user||null;updateAuth();
+  const auth=await client.auth.getSession(),saved=savedAuth();user=auth.data?.user||saved?.user||null;sessionToken=auth.data?.session?.token||sessionToken||saved?.token||null;if(user&&sessionToken)sessionStorage.setItem(authKey,JSON.stringify({user,token:sessionToken}));updateAuth();
   if(!user){$('account-panel').classList.remove('hidden');return;}
   if(!user.emailVerified){$('verify-form').classList.remove('hidden');throw Error('Verify your email before opening your competitions.');}
   const account=await api('/me');role=account.role;accountMode=hasAdminRole()?'admin':'user';
@@ -153,7 +156,7 @@ function exportSession(){
   const url=URL.createObjectURL(new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}));
   const a=document.createElement('a');a.href=url;a.download=`${session.label.replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'').toLowerCase()||'bowling-session'}-backup.json`;a.click();URL.revokeObjectURL(url);
 }
-async function signOut(){if(!canLeave())return;await client.auth.signOut();user=null;session=null;competition=null;dirty=false;updateAuth();['competition-panel','session-panel','tournament-workspace'].forEach(id=>$(id).classList.add('hidden'));$('account-panel').classList.remove('hidden');notice('Signed out.');}
+async function signOut(){if(!canLeave())return;await client.auth.signOut();sessionStorage.removeItem(authKey);sessionToken=null;user=null;session=null;competition=null;dirty=false;updateAuth();['competition-panel','session-panel','tournament-workspace'].forEach(id=>$(id).classList.add('hidden'));$('account-panel').classList.remove('hidden');notice('Signed out.');}
 window.TournamentCloud={notice,saveState,renderScores,commitScores,importLegacy,exportSession,
  rosterOptions:()=>'<option value="">Choose a registered bowler</option>'+roster.filter(p=>p.active).map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join(''),
  profileName:id=>roster.find(p=>p.id===id)?.name||'',
