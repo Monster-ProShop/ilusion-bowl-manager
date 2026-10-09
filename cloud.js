@@ -14,6 +14,7 @@ const hasAdminRole=()=>['manager','superadmin'].includes(role);
 const manager=()=>accountMode==='admin'&&!!competition?.can_manage;
 function updateAuth(){ $('btn-login').textContent=user?'My competitions':'Sign in';$('btn-logout').classList.toggle('hidden',!user); }
 async function activeToken(attempts=5){
+  if(sessionToken)return sessionToken;
   let lastError;
   for(let attempt=0;attempt<attempts;attempt++){
     try{
