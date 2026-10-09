@@ -124,6 +124,7 @@
 </section>
 <section id="competition-panel" class="container hidden">
  <div class="panel-heading"><div><p class="eyebrow">YOUR COMPETITIONS</p><h2>Leagues & tournaments</h2></div><div class="account-controls"><span id="account-name"></span><label id="account-mode-wrap" class="hidden">Use account as<select id="account-mode"><option value="admin">Admin</option><option value="user">Bowler</option></select></label></div></div>
+ <section id="bowler-career" class="hidden"><h3>My Bowling Dashboard</h3><div id="career-stats" class="stat-grid"></div><div id="career-competitions" class="competition-list"></div></section>
  <div class="cloud-form"><label>Find a competition<input id="competition-search" type="search" placeholder="Name, city or bowling center"></label><button id="search-competitions">Search</button></div><div id="competition-list" class="competition-list"></div>
  <details id="create-competition-details" class="hidden"><summary>Create a league or tournament</summary><form id="create-competition" class="cloud-form field-grid"><label>Name<input name="name" required maxlength="120"></label><label>Type<select name="kind"><option value="league">League</option><option value="tournament">Tournament</option></select></label><label>Country<input name="country" required></label><label>State / region<input name="region" required></label><label>City<input name="city" required></label><label>Bowling center<input name="bowlingCenter" required></label><button class="primary">Create competition</button></form></details>
  <section id="superadmin-users" class="hidden admin-users"><p class="eyebrow">SUPERADMIN</p><h3>Registered user access</h3><p class="hint">Set registered accounts as Admin or User. Admins can switch to Bowler mode when they participate in a league.</p><label>Find user by email<input id="admin-user-search" type="search" autocomplete="off" placeholder="Search registered email"></label><div id="admin-user-results"></div></section>
@@ -677,8 +678,8 @@ window.TournamentManager = {
         showPage
     };
 </script>
-<script src="portal-config.js?v=20261009-4"></script>
-<script type="module" src="cloud.js?v=20261009-4"></script>
+<script src="portal-config.js?v=20261009-5"></script>
+<script type="module" src="cloud.js?v=20261009-5"></script>
 </body>
 </html>
 
