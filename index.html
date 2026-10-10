@@ -142,7 +142,7 @@
    <fieldset><legend>League format</legend><div class="field-grid"><label>Number of teams<input name="numberOfTeams" type="number" min="4" max="48" step="2" required></label><label>Active bowlers per session<input name="activeBowlers" type="number" min="1" max="12" required></label><label>Substitute bowlers per roster<input name="substituteBowlers" type="number" min="0" max="24" required></label><label>Number of sessions<input name="numberOfSessions" type="number" min="1" max="60" required></label><label>Games per bowler per session<input name="gamesPerBowler" type="number" min="1" max="12" required></label><label>First session date<input name="startDate" type="date" required></label><label>First lane<input name="startLane" type="number" min="1" required></label><label>Position rounds<input name="positionRounds" placeholder="Example: 12, 24, 36"></label></div></fieldset>
    <fieldset><legend>Divisions</legend><div class="field-grid"><label>Team division names<input name="teamDivisions" placeholder="North, South"></label><label>Bowler division names<input name="bowlerDivisions" placeholder="A, B, C"></label></div></fieldset>
    <fieldset><legend>Standard league points</legend><div class="field-grid"><label>Points per team game won<input name="gameWin" type="number" min="0" step="0.5" required></label><label>Points per team game tie<input name="gameTie" type="number" min="0" step="0.5" required></label><label>Points per team series won<input name="seriesWin" type="number" min="0" step="0.5" required></label><label>Points per team series tie<input name="seriesTie" type="number" min="0" step="0.5" required></label></div><label>Bonus points, one per line <span class="hint">Concept | Points</span><textarea name="bonuses" rows="3" placeholder="Perfect game | 1"></textarea></label></fieldset>
-   <fieldset><legend>Handicap rules</legend><div class="field-grid"><label>Handicap percent<input name="handicapPercent" type="number" min="0" max="100" required></label><label>Based on average<input name="handicapBase" type="number" min="0" max="300" required></label><label>Minimum permitted average<input name="minimumAverage" type="number" min="0" max="300" required></label><label>Maximum permitted average<input name="maximumAverage" type="number" min="0" max="300" required></label></div><div id="division-handicap-rules"></div></fieldset>
+   <fieldset><legend>Handicap rules</legend><div class="field-grid"><label>Handicap percent<input name="handicapPercent" type="number" min="0" max="100" required></label><label>Based on average<input name="handicapBase" type="number" min="0" max="300" required></label><label>Minimum handicap<input name="minimumHandicap" type="number" min="0" max="300" required></label><label>Maximum handicap<input name="maximumHandicap" type="number" min="0" max="300" required></label></div><div id="division-handicap-rules"></div></fieldset>
    <fieldset><legend>League finances</legend><div class="field-grid"><label>Cost per game<input name="costPerGame" type="number" min="0" step="0.01" required></label><label>Prize fund per bowler / session<input name="prizeFundPerSession" type="number" min="0" step="0.01" required></label></div><h4>Bowling-center sponsorships</h4><p class="hint">Enter the amount per session that the center covers. Bowlers are listed alphabetically.</p><div id="sponsorship-list"></div></fieldset>
    <div class="action-row"><button class="primary" type="submit">Save League Configuration</button><button id="generate-league-schedule" type="button">Generate League Matches / Sessions</button></div>
   </form>
@@ -678,8 +678,8 @@ window.TournamentManager = {
         showPage
     };
 </script>
-<script src="portal-config.js?v=20261009-5"></script>
-<script type="module" src="cloud.js?v=20261009-5"></script>
+<script src="portal-config.js?v=20261009-6"></script>
+<script type="module" src="cloud.js?v=20261009-6"></script>
 </body>
 </html>
 
