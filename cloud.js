@@ -60,7 +60,7 @@ async function dashboard(){
   const requested=new URLSearchParams(location.search).get('competition');
   if(requested){const row=competitionRows.find(c=>c.id===requested);if(row)await openCompetition(row);}
 }
-async function loadCareerSummary(){const data=await api('/career-summary');$('career-stats').innerHTML=[['Overall average',data.average||'—'],['Games',data.totalGames||0],['High HCP game',data.highGameHandicap||'—'],['High HCP series',data.highSeriesHandicap||'—']].map(([l,v])=>`<div class="stat-card"><span class="hint">${l}</span><strong>${v}</strong></div>`).join('');
+async function loadCareerSummary(){const data=await api('/league-career-summary');$('career-stats').innerHTML=[['League average',data.average||'—'],['League games',data.totalGames||0],['High HCP game',data.highGameHandicap||'—'],['High HCP series',data.highSeriesHandicap||'—']].map(([l,v])=>`<div class="stat-card"><span class="hint">${l}</span><strong>${v}</strong></div>`).join('');
  $('career-competitions').innerHTML=(data.competitions||[]).map(c=>`<article class="competition-card"><h3>${esc(c.name)}</h3><p>${esc(c.games)} games · ${esc(c.pinfall)} pins · ${esc(c.sessionsPlayed)} sessions</p><div class="field-grid"><div><span class="hint">Average</span><strong>${esc(c.average||'—')}</strong></div><div><span class="hint">High HCP game</span><strong>${esc(c.highGameHandicap||'—')}</strong></div><div><span class="hint">High HCP series</span><strong>${esc(c.highSeriesHandicap||'—')}</strong></div></div></article>`).join('')||'<p class="hint">Link your verified bowler profile inside a league to see your statistics here.</p>';}
 async function loadUsers(){accessUsers=await api('/users');renderUsers('');}
 function renderUsers(filter){
