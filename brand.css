@@ -4,7 +4,7 @@
 body { line-height: 1.5; background-attachment: fixed; }
 header { padding: 18px max(24px, calc((100vw - 1120px) / 2)); gap: 24px; }
 .header-brand { text-decoration: none; color: var(--text-main); gap: 14px; flex-shrink: 0; }
-.header-brand img.logo { width: 92px; height: 64px; object-fit: contain; box-shadow: none; border-radius: 0; }
+.header-brand img.logo { width: 78px; height: 52px; object-fit: contain; object-position: center; box-shadow: none; border-radius: 0; }
 .brand-wordmark { display: flex; flex-direction: column; }
 .brand-title { font-size: 25px; font-weight: 800; letter-spacing: -1px; line-height: 1.15; }
 .brand-signature { font-size: 15px; margin-top: 5px; line-height: 1.2; color: var(--text-main); }
@@ -21,7 +21,7 @@ main { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 .eyebrow { font-size: 11px; font-weight: 800; letter-spacing: 2.5px; color: var(--gold); margin: 0 0 12px; }
 h1 { font-size: clamp(28px, 3.3vw, 42px); letter-spacing: -1.6px; line-height: 1.2; margin: 0 0 14px; font-weight: 800; }
 .intro-copy { color: var(--text-muted); font-size: 15px; max-width: 490px; margin: 0; }
-.intro-mark { object-fit: contain; width: 225px; height: 145px; filter: drop-shadow(0 8px 20px #0008); }
+.intro-mark { object-fit: contain; object-position: center; width: 225px; height: 125px; filter: drop-shadow(0 8px 20px #0008); }
 .container { max-width: none; margin: 24px 0; padding: 28px; border-radius: 16px; background: linear-gradient(145deg, #20201e, #171716); border-color: #38342b; box-shadow: 0 12px 40px #0002; }
 .nav-buttons.container { padding: 0; background: none; border: none; box-shadow: none; gap: 10px; }
 .nav-buttons button { color: var(--text-muted); border-color: #3d3930; background: #191918; }
@@ -43,7 +43,7 @@ h3 { color: var(--text-main); font-size: 21px; font-weight: 600; letter-spacing:
 .footer-by { font-weight: 400; }
 @media (max-width: 720px) {
     header { position: static; flex-wrap: wrap; padding: 18px 20px; gap: 18px; }
-    .header-brand img.logo { width: 75px; height: 52px; }
+    .header-brand img.logo { width: 68px; height: 46px; }
     .brand-title { font-size: 24px; }
     #auth-section { justify-content: flex-start; width: 100%; gap: 10px; }
     #btn-login { flex: 1; }
